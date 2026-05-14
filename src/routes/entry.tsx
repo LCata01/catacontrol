@@ -9,7 +9,6 @@ import { getActiveEvent, getOpenShift } from "@/lib/queries";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { money } from "@/lib/format";
-import { printTicket } from "@/lib/printer";
 import { CloseShiftDialog } from "@/components/CloseShiftDialog";
 import { ComplimentaryDialog } from "@/components/ComplimentaryDialog";
 
@@ -48,14 +47,6 @@ function EntryPos() {
       if (error) throw error; return data!;
     },
   });
-  const { data: sales } = useQuery({
-    queryKey: ["shift-sales", shift?.id], enabled: !!shift?.id,
-    queryFn: async () => {
-      const { data, error } = await supabase.from("sales").select("*").eq("shift_id", shift!.id);
-      if (error) throw error; return data!;
-    },
-  });
-
   const [cart, setCart] = useState<CartItem[]>([]);
   const [pay, setPay] = useState<"cash" | "qr" | "card">("cash");
   const [busy, setBusy] = useState(false);
@@ -105,16 +96,8 @@ function EntryPos() {
     const { error: e2 } = await supabase.from("sale_items").insert(items);
     setBusy(false);
     if (e2) { toast.error(e2.message); return; }
-    toast.success(`Sale #${sale.sale_number}`);
-    printTicket({
-      title: "ENTRADA",
-      subtitle: `${lock?.name} · ${event?.name ?? ""}`,
-      number: `#${sale.sale_number}`,
-      lines: cart.map((i) => ({ left: `${i.qty}x ${i.name}`, right: money(i.price * i.qty) })),
-      total, payment: pay,
-    });
+    toast.success(`Sale #${sale.sale_number} saved`);
     setCart([]);
-    qc.invalidateQueries({ queryKey: ["shift-sales", shift.id] });
   };
 
   if (isLoading) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Loading…</div>;
@@ -172,10 +155,6 @@ function EntryPos() {
         </div>
 
         <div className="flex flex-col rounded-2xl border border-border bg-card">
-          <div className="border-b border-border p-4">
-            <div className="text-xs uppercase tracking-widest text-muted-foreground">Sales this shift</div>
-            <div className="text-2xl font-black">{sales?.length ?? 0} · {money((sales ?? []).reduce((s: number, x: any) => s + Number(x.total), 0))}</div>
-          </div>
           <div className="flex-1 overflow-auto p-4">
             {cart.length === 0 && <p className="text-center text-sm text-muted-foreground">Tap items to add</p>}
             {cart.map((i) => (
