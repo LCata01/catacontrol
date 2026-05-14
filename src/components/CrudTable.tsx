@@ -6,7 +6,7 @@ import { toast } from "sonner";
 export type Field = {
   key: string;
   label: string;
-  type?: "text" | "number" | "select" | "checkbox";
+  type?: "text" | "number" | "select" | "checkbox" | "date" | "time";
   options?: { value: string; label: string }[];
   required?: boolean;
 };
@@ -84,7 +84,16 @@ export function CrudTable({
 
 function renderCell(v: any, f: Field) {
   if (f.type === "checkbox") return v ? "✓" : "—";
-  if (v === null || v === undefined) return "—";
+  if (v === null || v === undefined || v === "") return "—";
+  if (f.type === "date") {
+    // v comes as YYYY-MM-DD from Postgres; render as DD/MM/YYYY
+    const m = String(v).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return m ? `${m[3]}/${m[2]}/${m[1]}` : String(v);
+  }
+  if (f.type === "time") {
+    const m = String(v).match(/^(\d{2}):(\d{2})/);
+    return m ? `${m[1]}:${m[2]}` : String(v);
+  }
   if (typeof v === "boolean") return v ? "✓" : "—";
   return String(v);
 }
@@ -113,6 +122,10 @@ function Editor({ row, fields, title, onCancel, onSave }: {
                 </select>
               ) : f.type === "checkbox" ? (
                 <label className="flex items-center gap-2"><input type="checkbox" checked={!!val[f.key]} onChange={(e) => update(f.key, e.target.checked)} /> {f.label}</label>
+              ) : f.type === "date" || f.type === "time" ? (
+                <input type={f.type} value={val[f.key] ?? ""}
+                  onChange={(e) => update(f.key, e.target.value || null)}
+                  className="w-full rounded-lg border border-border bg-input px-3 py-2.5" />
               ) : (
                 <input type={f.type === "number" ? "number" : "text"} value={val[f.key] ?? ""}
                   onChange={(e) => update(f.key, f.type === "number" ? (e.target.value === "" ? null : Number(e.target.value)) : e.target.value)}
