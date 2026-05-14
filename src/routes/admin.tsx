@@ -6,26 +6,36 @@ export const Route = createFileRoute("/admin")({
   component: () => <Guard requireRole="superadmin"><AdminLayout /></Guard>,
 });
 
-const tabs = [
-  // Operación
-  { to: "/admin", label: "En Vivo" },
-  { to: "/admin/cashboxes", label: "Cajas Abiertas" },
-  { to: "/admin/reports", label: "Reportes" },
-  // Catálogo de venta
-  { to: "/admin/tickets", label: "Tickets" },
-  { to: "/admin/wristbands", label: "Pulseras" },
-  { to: "/admin/products", label: "Productos" },
-  { to: "/admin/product-categories", label: "Categorías Productos" },
-  { to: "/admin/staff-categories", label: "Categorías Staff" },
-  // Puestos físicos
-  { to: "/admin/bars", label: "Barras" },
-  { to: "/admin/entries", label: "Entradas" },
-  // Configuración
-  { to: "/admin/events", label: "Eventos" },
-  { to: "/admin/users", label: "Usuarios" },
-  { to: "/admin/staff", label: "Staff" },
-  { to: "/admin/settings", label: "Ticket" },
-  { to: "/admin/printing", label: "Impresión" },
+const tabGroups: { label: string; tabs: { to: string; label: string }[] }[] = [
+  { label: "Operación", tabs: [
+    { to: "/admin", label: "En Vivo" },
+    { to: "/admin/cashboxes", label: "Cajas Abiertas" },
+    { to: "/admin/reports", label: "Reportes" },
+  ]},
+  { label: "Tickets y Pulseras", tabs: [
+    { to: "/admin/tickets", label: "Tickets" },
+    { to: "/admin/wristbands", label: "Pulseras" },
+  ]},
+  { label: "Productos", tabs: [
+    { to: "/admin/products", label: "Productos" },
+    { to: "/admin/product-categories", label: "Categorías Productos" },
+  ]},
+  { label: "Staff", tabs: [
+    { to: "/admin/staff", label: "Staff" },
+    { to: "/admin/staff-categories", label: "Categorías Staff" },
+  ]},
+  { label: "Puestos físicos", tabs: [
+    { to: "/admin/bars", label: "Barras" },
+    { to: "/admin/entries", label: "Entradas" },
+  ]},
+  { label: "Impresión", tabs: [
+    { to: "/admin/settings", label: "Ticket" },
+    { to: "/admin/printing", label: "Impresión" },
+  ]},
+  { label: "Configuración", tabs: [
+    { to: "/admin/events", label: "Eventos" },
+    { to: "/admin/users", label: "Usuarios" },
+  ]},
 ];
 
 function AdminLayout() {
