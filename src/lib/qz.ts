@@ -50,10 +50,15 @@ export async function loadQz(): Promise<any> {
       await loadScript(QZ_CDN);
       const qz = window.qz!;
       qz.api.setPromiseType((resolver: any) => new Promise(resolver));
-      // SHA512 is the QZ Tray 2.1+ default; declare explicitly.
+
+      // Configure signing BEFORE any connect/print so QZ embeds the signature.
+      // QZ Tray 2.1+ default is SHA512 — declare explicitly to avoid
+      // "Signature: Missing / Validity: Invalid" on the QZ approval dialog.
       try {
         qz.security.setSignatureAlgorithm("SHA512");
-      } catch {}
+      } catch (e) {
+        console.warn("[qz] setSignatureAlgorithm failed", e);
+      }
 
       const cert = await fetchCertificate();
       if (cert) {
@@ -62,11 +67,15 @@ export async function loadQz(): Promise<any> {
           return (resolve: any, reject: any) => {
             signQzPayload({ data: { payload: toSign } })
               .then((r: any) => resolve(r.signature))
-              .catch((e: any) => reject(e));
+              .catch((e: any) => {
+                console.error("[qz] sign failed", e);
+                reject(e);
+              });
           };
         });
+        console.info("[qz] signing enabled (SHA512)");
       } else {
-        // No cert configured — fall back to QZ's authorization popup.
+        console.warn("[qz] no certificate configured — using anonymous mode");
         qz.security.setCertificatePromise((resolve: any) => resolve());
         qz.security.setSignaturePromise(() => (resolve: any) => resolve());
       }
