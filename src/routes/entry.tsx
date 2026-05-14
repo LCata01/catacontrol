@@ -110,7 +110,8 @@ function EntryPos() {
     const { error: e2 } = await supabase.from("sale_items").insert(items);
     setBusy(false);
     if (e2) { toast.error(e2.message); return; }
-    toast.success(`Venta #${sale.sale_number} guardada · ${totalPeople} persona(s)`);
+    const ticketNo = (sale as any).ticket_number ?? sale.sale_number;
+    toast.success(`Ticket ${ticketNo} · ${totalPeople} persona(s)`);
     setCart([]);
   };
 
