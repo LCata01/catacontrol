@@ -2,10 +2,25 @@ import { ReactNode } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useNavigate, Link } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export function TopBar({ title, right, back }: { title: string; right?: ReactNode; back?: string }) {
   const { username, role, signOut, lock } = useAuth();
   const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    // Auto-close any open shift to release the terminal
+    if (lock?.shiftId) {
+      await supabase.from("shifts").update({
+        status: "closed",
+        closed_at: new Date().toISOString(),
+      }).eq("id", lock.shiftId).eq("status", "open");
+    }
+    await signOut();
+    navigate({ to: "/login" });
+  };
+
+  const roleLabel = role === "superadmin" ? "SUPERADMIN" : role === "cashier" ? "CAJERO" : "";
 
   return (
     <header className="sticky top-0 z-40 flex items-center justify-between border-b border-border bg-background/95 px-6 py-3 backdrop-blur">
@@ -22,17 +37,17 @@ export function TopBar({ title, right, back }: { title: string; right?: ReactNod
         {right}
         {lock && (
           <div className="hidden rounded-md border border-border bg-card px-3 py-1.5 text-xs uppercase tracking-widest md:block">
-            {lock.kind === "bar" ? "BAR" : "ENTRY"} · {lock.name}
+            {lock.kind === "bar" ? "BARRA" : "ENTRADA"} · {lock.name}
           </div>
         )}
         <div className="hidden text-right text-xs leading-tight md:block">
           <div className="font-bold uppercase">{username}</div>
-          <div className="text-muted-foreground uppercase">{role}</div>
+          <div className="text-muted-foreground uppercase">{roleLabel}</div>
         </div>
         <button
-          onClick={async () => { await signOut(); navigate({ to: "/login" }); }}
+          onClick={handleLogout}
           className="rounded-md border border-border bg-card px-3 py-2 text-sm hover:bg-destructive hover:border-destructive"
-          title="Logout"
+          title="Cerrar sesión"
         >
           <LogOut className="h-4 w-4" />
         </button>
