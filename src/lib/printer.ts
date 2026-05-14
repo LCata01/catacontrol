@@ -1,3 +1,5 @@
+import { connectQz, getSavedPrinter, printRaw } from "./qz";
+
 type Line = { qty: number; name: string; unit: number; subtotal: number };
 
 export type TicketBranding = {
@@ -6,7 +8,7 @@ export type TicketBranding = {
   logo_url?: string | null;
 };
 
-export function printBarTicket(opts: {
+export type BarTicketOpts = {
   branding: TicketBranding;
   number: string | number;
   bar: string;
@@ -15,8 +17,113 @@ export function printBarTicket(opts: {
   lines: Line[];
   total: number;
   payment: string;
-}) {
+};
+
+// ----------------- ESC/POS helpers -----------------
+const ESC = "\x1B";
+const GS = "\x1D";
+const INIT = ESC + "@";
+const ALIGN_L = ESC + "a" + "\x00";
+const ALIGN_C = ESC + "a" + "\x01";
+const BOLD_ON = ESC + "E" + "\x01";
+const BOLD_OFF = ESC + "E" + "\x00";
+const SIZE_NORMAL = GS + "!" + "\x00";
+const SIZE_DBL = GS + "!" + "\x11"; // double width + height
+const SIZE_DBL_W = GS + "!" + "\x10";
+// Full cut with feed: GS V 66 n  (partial cut: 66/1, full cut: 65/0). Use full.
+const CUT = GS + "V" + "B" + "\x03"; // feed 3 lines then full cut
+const FEED = (n: number) => ESC + "d" + String.fromCharCode(n);
+
+const COLS = 42; // typical 80mm at Font A is 42-48 cols; choose 42 for safety
+
+function pad(s: string, n: number) {
+  if (s.length >= n) return s.slice(0, n);
+  return s + " ".repeat(n - s.length);
+}
+function padL(s: string, n: number) {
+  if (s.length >= n) return s.slice(0, n);
+  return " ".repeat(n - s.length) + s;
+}
+function hr(ch = "-") {
+  return ch.repeat(COLS) + "\n";
+}
+function money(n: number) {
+  return "$" + Number(n).toLocaleString("es-AR");
+}
+
+function buildEscPos(opts: BarTicketOpts): string {
+  const name = (opts.branding.nightclub_name || "CATA CLUB").toUpperCase();
+  const slogan = opts.branding.slogan || "";
+  const now = new Date();
+  const date = now.toLocaleDateString("es-AR");
+  const time = now.toLocaleTimeString("es-AR", { hour12: false });
+
+  let out = "";
+  out += INIT;
+  out += ALIGN_C + SIZE_DBL + BOLD_ON + name + "\n" + BOLD_OFF + SIZE_NORMAL;
+  if (slogan) out += slogan + "\n";
+  out += hr("=");
+
+  out += ALIGN_L;
+  out += pad("FECHA", 10) + padL(date, COLS - 10) + "\n";
+  out += pad("HORA", 10) + padL(time, COLS - 10) + "\n";
+  out += pad("BARRA", 10) + padL(opts.bar, COLS - 10) + "\n";
+  out += pad("CAJERO", 10) + padL(opts.cashier, COLS - 10) + "\n";
+  if (opts.event) out += pad("EVENTO", 10) + padL(opts.event, COLS - 10) + "\n";
+  out += hr();
+
+  // Header columns: CANT(4) PRODUCTO(20) P.U(8) TOTAL(10) = 42
+  const cQty = 4, cName = 20, cUnit = 8, cTot = COLS - cQty - cName - cUnit;
+  out += BOLD_ON;
+  out += pad("CNT", cQty) + pad("PRODUCTO", cName) + padL("P.U", cUnit) + padL("TOTAL", cTot) + "\n";
+  out += BOLD_OFF;
+  out += hr();
+  for (const l of opts.lines) {
+    const nm = l.name.length > cName ? l.name.slice(0, cName) : l.name;
+    out += pad(String(l.qty), cQty) + pad(nm, cName) + padL(money(l.unit), cUnit) + padL(money(l.subtotal), cTot) + "\n";
+    if (l.name.length > cName) {
+      // continuation line for long names
+      out += pad("", cQty) + pad(l.name.slice(cName, cName * 2), cName) + "\n";
+    }
+  }
+  out += hr();
+
+  out += BOLD_ON + SIZE_DBL_W;
+  out += pad("TOTAL", 10) + padL(money(opts.total), COLS - 10) + "\n";
+  out += SIZE_NORMAL + BOLD_OFF;
+  out += pad("PAGO", 10) + padL(opts.payment.toUpperCase(), COLS - 10) + "\n";
+  out += hr();
+
+  out += ALIGN_C + "Gracias por su compra!\n";
+  out += `TICKET #${opts.number}\n`;
+  out += ALIGN_L;
+  out += FEED(2);
+  out += CUT;
+  return out;
+}
+
+// ----------------- Public API -----------------
+
+export async function printBarTicket(opts: BarTicketOpts) {
   if (typeof window === "undefined") return;
+
+  // Try QZ Tray first if a printer is configured
+  if (getSavedPrinter()) {
+    try {
+      await connectQz();
+      const data = buildEscPos(opts);
+      await printRaw([{ type: "raw", format: "plain", data }]);
+      return;
+    } catch (err) {
+      console.error("QZ print failed, falling back to browser print", err);
+    }
+  }
+
+  // Fallback: browser HTML print
+  printBarTicketHtml(opts);
+}
+
+function printBarTicketHtml(opts: BarTicketOpts) {
   const w = window.open("", "PRINT", "width=360,height=720");
   if (!w) return;
   const fmt = (n: number) => "$" + Number(n).toLocaleString("es-AR");
@@ -66,7 +173,7 @@ export function printBarTicket(opts: {
     <tbody>
       ${opts.lines.map(l => `<tr>
         <td class="c">${l.qty}</td>
-        <td>${escape(l.name)}</td>
+        <td>${esc(l.name)}</td>
         <td class="r">${fmt(l.unit)}</td>
         <td class="r">${fmt(l.subtotal)}</td>
       </tr>`).join("")}
@@ -84,7 +191,7 @@ export function printBarTicket(opts: {
   w.document.close();
 }
 
-function escape(s: string) {
+function esc(s: string) {
   return String(s).replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 }
