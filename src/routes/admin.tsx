@@ -15,7 +15,8 @@ const tabs = [
   { to: "/admin/tickets", label: "Tickets" },
   { to: "/admin/wristbands", label: "Pulseras" },
   { to: "/admin/products", label: "Productos" },
-  { to: "/admin/product-categories", label: "Categorías" },
+  { to: "/admin/product-categories", label: "Categorías Productos" },
+  { to: "/admin/staff-categories", label: "Categorías Staff" },
   // Puestos físicos
   { to: "/admin/bars", label: "Barras" },
   { to: "/admin/entries", label: "Entradas" },
