@@ -17,6 +17,19 @@ export const Route = createFileRoute("/platform/company/$companyId")({
   component: CompanyDetailPage,
 });
 
+function prettifyError(e: any): string {
+  const msg = e?.message ?? String(e);
+  try {
+    const parsed = JSON.parse(msg);
+    if (Array.isArray(parsed) && parsed[0]?.message) {
+      return parsed.map((p: any) => `${p.path?.join(".") ?? ""}: ${p.message}`).join(" · ");
+    }
+  } catch {}
+  if (/at least 6 character/i.test(msg)) return "La contraseña debe tener al menos 6 caracteres";
+  if (/Invalid.*regex|String must match/i.test(msg)) return "Usuario inválido (sólo letras, números, _ . -)";
+  return msg;
+}
+
 const ROLE_LABEL: Record<string, string> = {
   superadmin: "Superadmin",
   cashier: "Cajero",
@@ -86,7 +99,7 @@ function CompanyDetailPage() {
                 toast.success("Usuario creado");
                 setShowNew(false);
                 qc.invalidateQueries({ queryKey: ["platform-company-users", companyId] });
-              } catch (e: any) { toast.error(e.message); }
+              } catch (e: any) { toast.error(prettifyError(e)); }
             }}
           />
         )}
@@ -122,7 +135,7 @@ function CompanyDetailPage() {
                           try {
                             await updateUser({ data: { companyId, targetUserId: u.id, active: !u.active } });
                             qc.invalidateQueries({ queryKey: ["platform-company-users", companyId] });
-                          } catch (e: any) { toast.error(e.message); }
+                          } catch (e: any) { toast.error(prettifyError(e)); }
                         }}
                         className="rounded border border-border px-3 py-1 text-xs hover:bg-accent"
                       >
@@ -150,7 +163,7 @@ function CompanyDetailPage() {
               toast.success("Usuario actualizado");
               setEditing(null);
               qc.invalidateQueries({ queryKey: ["platform-company-users", companyId] });
-            } catch (e: any) { toast.error(e.message); }
+            } catch (e: any) { toast.error(prettifyError(e)); }
           }}
         />
       )}
