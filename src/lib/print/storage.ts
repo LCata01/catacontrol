@@ -27,15 +27,15 @@ export function getMachineId(): string {
     id =
       (crypto as any)?.randomUUID?.() ??
       Math.random().toString(36).slice(2) + Date.now().toString(36);
-    localStorage.setItem(MACHINE_KEY, id);
+    localStorage.setItem(MACHINE_KEY, id as string);
   }
-  return id;
+  return id as string;
 }
 
 function bindingKey(args: {
-  tenantId: string | null | undefined;
-  terminalId: string | null | undefined;
-  userId: string | null | undefined;
+  tenantId?: string | null;
+  terminalId?: string | null;
+  userId?: string | null;
 }) {
   return [
     args.tenantId ?? "_",
