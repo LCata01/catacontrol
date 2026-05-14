@@ -10,7 +10,10 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { money } from "@/lib/format";
 import { printBarTicket } from "@/lib/printer";
-import { PrinterSettingsButton } from "@/components/PrinterSettings";
+import { PrinterStatus } from "@/components/PrinterStatus";
+import { PrinterSetup } from "@/components/PrinterSetup";
+import { getActivePrinter, setActivePrinter } from "@/lib/print";
+import { useTenant } from "@/lib/tenant-context";
 import { StaffConsumptionDialog } from "@/components/StaffConsumptionDialog";
 import { CloseShiftDialog } from "@/components/CloseShiftDialog";
 
