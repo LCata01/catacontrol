@@ -39,6 +39,7 @@ const ESC_FULL_CUT = "\x1D\x56\x00";
 const ESC_PARTIAL_CUT = "\x1D\x56\x01";
 
 let connectPromise: Promise<void> | null = null;
+const CONNECT_OPTIONS = { retries: 2, delay: 1 };
 
 // Heuristic: many common cutter-capable printer keywords. We don't have a
 // reliable cross-driver capability flag through the OS print spooler, so we
@@ -67,13 +68,47 @@ function detectCutter(name: string): "full" | "partial" | "none" {
   return "none";
 }
 
+function isReconnectableQzError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return /sendData is not a function|connection closed|not been established|already exists|still closing|current connection attempt/i.test(
+    message,
+  );
+}
+
+async function settle(ms = 250) {
+  await new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+async function resetConnection() {
+  connectPromise = null;
+  if (!qz.websocket.isActive()) return;
+  try {
+    await qz.websocket.disconnect();
+  } catch {
+    // QZ may already be closing after standby; give the browser a moment.
+  }
+  await settle();
+}
+
+async function verifyConnection() {
+  if (!qz.websocket.isActive()) return false;
+  try {
+    await qz.api.getVersion();
+    return true;
+  } catch (error) {
+    if (isReconnectableQzError(error)) return false;
+    throw error;
+  }
+}
+
 async function ensureConnected() {
   configureSigning();
-  if (qz.websocket.isActive()) return;
+  if (await verifyConnection()) return;
+  await resetConnection();
   if (connectPromise) return connectPromise;
   connectPromise = (async () => {
     try {
-      await qz.websocket.connect({ retries: 1, delay: 1 });
+      await qz.websocket.connect(CONNECT_OPTIONS);
     } finally {
       connectPromise = null;
     }
@@ -81,14 +116,25 @@ async function ensureConnected() {
   return connectPromise;
 }
 
+async function withReconnect<T>(operation: () => Promise<T>): Promise<T> {
+  await ensureConnected();
+  try {
+    return await operation();
+  } catch (error) {
+    if (!isReconnectableQzError(error)) throw error;
+    await resetConnection();
+    await ensureConnected();
+    return operation();
+  }
+}
+
 export const qzPrintService: PrintService = {
   id: "qz",
 
   async isAvailable() {
     if (typeof window === "undefined") return false;
-    configureSigning();
     try {
-      await qz.websocket.connect({ retries: 0, delay: 0 });
+      await ensureConnected();
       return true;
     } catch {
       return false;
@@ -108,8 +154,7 @@ export const qzPrintService: PrintService = {
   },
 
   async listPrinters(): Promise<PrinterInfo[]> {
-    await ensureConnected();
-    const names: string[] = await qz.printers.find();
+    const names: string[] = await withReconnect(() => qz.printers.find());
     return names.map((name) => ({ name }));
   },
 
@@ -140,7 +185,7 @@ export const qzPrintService: PrintService = {
       });
     }
 
-    await qz.print(config, data);
+    await withReconnect(() => qz.print(config, data));
   },
 
   async printTest(printerName: string, html: string) {
