@@ -145,24 +145,25 @@ export function PrinterSetup({
         <label className="text-xs uppercase tracking-widest text-muted-foreground">
           Agente de impresión
         </label>
-        <div className="mt-2 grid grid-cols-3 gap-2">
-          {(["auto", "cataprint", "qz"] as const).map((d) => (
+        <div className="mt-2 grid grid-cols-4 gap-2">
+          {(["auto", "cataprint", "qz", "browser"] as const).map((d) => (
             <button
               key={d}
               onClick={() => onChangeDriver(d)}
-              className={`rounded-lg border px-3 py-2 text-xs font-bold uppercase tracking-widest ${
+              className={`rounded-lg border px-2 py-2 text-xs font-bold uppercase tracking-widest ${
                 driver === d
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border bg-card hover:bg-accent"
               }`}
             >
-              {d === "auto" ? "Auto" : d === "cataprint" ? "CATAPRINT" : "QZ Tray"}
+              {d === "auto" ? "Auto" : d === "cataprint" ? "CATAPRINT" : d === "qz" ? "QZ Tray" : "Navegador"}
             </button>
           ))}
         </div>
         <p className="mt-1 text-[11px] text-muted-foreground">
           Activo: <span className="font-mono">{activeDriverId}</span>
-          {driver === "auto" && " (prefiere CATAPRINT, fallback QZ)"}
+          {driver === "auto" && " (CATAPRINT → QZ → Navegador)"}
+          {driver === "browser" && " · sin auto-cutter (diálogo del navegador)"}
         </p>
       </div>
 
