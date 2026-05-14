@@ -141,13 +141,39 @@ export function PrinterSetup({
         </div>
       </div>
 
+      <div className="mt-6">
+        <label className="text-xs uppercase tracking-widest text-muted-foreground">
+          Agente de impresión
+        </label>
+        <div className="mt-2 grid grid-cols-3 gap-2">
+          {(["auto", "cataprint", "qz"] as const).map((d) => (
+            <button
+              key={d}
+              onClick={() => onChangeDriver(d)}
+              className={`rounded-lg border px-3 py-2 text-xs font-bold uppercase tracking-widest ${
+                driver === d
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card hover:bg-accent"
+              }`}
+            >
+              {d === "auto" ? "Auto" : d === "cataprint" ? "CATAPRINT" : "QZ Tray"}
+            </button>
+          ))}
+        </div>
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          Activo: <span className="font-mono">{activeDriverId}</span>
+          {driver === "auto" && " (prefiere CATAPRINT, fallback QZ)"}
+        </p>
+      </div>
+
       {agentError && (
         <div className="mt-6 rounded-lg border border-destructive bg-destructive/10 p-4 text-sm">
           <div className="font-bold text-destructive">Agente de impresión no detectado</div>
           <p className="mt-1 text-muted-foreground">{agentError}</p>
           <p className="mt-2 text-xs text-muted-foreground">
-            Instalá <span className="font-mono">QZ Tray</span> en esta computadora y vuelva a intentar.
-            Será reemplazado pronto por el servicio CATAPRINT.
+            Iniciá <span className="font-mono">CATAPRINT</span> en esta PC (puerto 9100),
+            o instalá <span className="font-mono">QZ Tray</span> como compatibilidad.
+            También podés continuar sin impresora.
           </p>
         </div>
       )}
