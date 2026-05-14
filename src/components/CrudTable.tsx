@@ -35,6 +35,7 @@ export function CrudTable({
   const save = async (row: any) => {
     const payload = { ...row };
     delete payload.id; delete payload.created_at;
+    fields.filter(f => f.readonly).forEach(f => { delete payload[f.key]; });
     if (editing?.id) {
       const { error } = await supabase.from(table as any).update(payload).eq("id", editing.id);
       if (error) return toast.error(error.message);
