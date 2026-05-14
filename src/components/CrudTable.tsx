@@ -6,7 +6,7 @@ import { toast } from "sonner";
 export type Field = {
   key: string;
   label: string;
-  type?: "text" | "number" | "select" | "checkbox";
+  type?: "text" | "number" | "select" | "checkbox" | "date" | "time";
   options?: { value: string; label: string }[];
   required?: boolean;
 };
