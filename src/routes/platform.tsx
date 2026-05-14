@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/lib/auth-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { listCompanies, createCompany, toggleCompanyActive, resetCompanyPassword } from "@/lib/tenant.functions";
+import { listCompanies, createCompany, toggleCompanyActive } from "@/lib/tenant.functions";
 import { TopBar } from "@/components/TopBar";
 import { PasswordInput } from "@/components/PasswordInput";
 import { toast } from "sonner";
@@ -19,7 +19,6 @@ function PlatformPage() {
   const list = useServerFn(listCompanies);
   const create = useServerFn(createCompany);
   const toggle = useServerFn(toggleCompanyActive);
-  const reset = useServerFn(resetCompanyPassword);
   const qc = useQueryClient();
 
   useEffect(() => {
@@ -55,13 +54,6 @@ function PlatformPage() {
 
   const onToggle = async (id: string, active: boolean) => {
     try { await toggle({ data: { id, active: !active } }); qc.invalidateQueries({ queryKey: ["platform-companies"] }); }
-    catch (e: any) { toast.error(e.message); }
-  };
-
-  const onReset = async (id: string, codeName: string) => {
-    const np = prompt(`Nueva contraseña para ${codeName}:`);
-    if (!np || np.length < 6) { toast.error("Mínimo 6 caracteres"); return; }
-    try { await reset({ data: { id, password: np } }); toast.success("Contraseña actualizada"); }
     catch (e: any) { toast.error(e.message); }
   };
 
@@ -118,7 +110,6 @@ function PlatformPage() {
                     <td className="p-3 text-right">
                       <Link to="/platform/company/$companyId" params={{ companyId: c.id }}
                         className="mr-2 rounded border border-primary px-3 py-1 text-xs font-bold text-primary hover:bg-primary hover:text-primary-foreground">Gestionar</Link>
-                      <button onClick={() => onReset(c.id, c.code)} className="mr-2 rounded border border-border px-3 py-1 text-xs hover:bg-accent">Reset Pass</button>
                       <button onClick={() => onToggle(c.id, c.active)} className="rounded border border-border px-3 py-1 text-xs hover:bg-accent">{c.active ? "Desactivar" : "Activar"}</button>
                     </td>
                   </tr>
