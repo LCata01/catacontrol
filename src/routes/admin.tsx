@@ -23,6 +23,7 @@ const tabs = [
   { to: "/admin/users", label: "Usuarios" },
   { to: "/admin/staff", label: "Staff" },
   { to: "/admin/settings", label: "Ticket" },
+  { to: "/admin/printing", label: "Impresión" },
 ];
 
 function AdminLayout() {
