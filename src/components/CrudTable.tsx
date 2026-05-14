@@ -117,7 +117,11 @@ function Editor({ row, fields, title, onCancel, onSave }: {
           {fields.map(f => (
             <div key={f.key}>
               <label className="mb-1 block text-xs uppercase tracking-widest text-muted-foreground">{f.label}</label>
-              {f.type === "select" ? (
+              {f.readonly ? (
+                <div className="w-full rounded-lg border border-border bg-muted px-3 py-2.5 text-muted-foreground">
+                  {val[f.key] ?? "— (se genera automáticamente)"}
+                </div>
+              ) : f.type === "select" ? (
                 <DynamicSelect field={f} value={val[f.key] ?? ""} onChange={(v) => update(f.key, v)} />
               ) : f.type === "checkbox" ? (
                 <label className="flex items-center gap-2"><input type="checkbox" checked={!!val[f.key]} onChange={(e) => update(f.key, e.target.checked)} /> {f.label}</label>
