@@ -18,6 +18,15 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as WorkstationEntryRouteImport } from './routes/workstation.entry'
 import { Route as WorkstationBarRouteImport } from './routes/workstation.bar'
+import { Route as AdminWristbandsRouteImport } from './routes/admin.wristbands'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminTicketsRouteImport } from './routes/admin.tickets'
+import { Route as AdminStaffRouteImport } from './routes/admin.staff'
+import { Route as AdminReportsRouteImport } from './routes/admin.reports'
+import { Route as AdminProductsRouteImport } from './routes/admin.products'
+import { Route as AdminEventsRouteImport } from './routes/admin.events'
+import { Route as AdminEntriesRouteImport } from './routes/admin.entries'
+import { Route as AdminBarsRouteImport } from './routes/admin.bars'
 
 const WorkstationRoute = WorkstationRouteImport.update({
   id: '/workstation',
@@ -64,6 +73,51 @@ const WorkstationBarRoute = WorkstationBarRouteImport.update({
   path: '/bar',
   getParentRoute: () => WorkstationRoute,
 } as any)
+const AdminWristbandsRoute = AdminWristbandsRouteImport.update({
+  id: '/wristbands',
+  path: '/wristbands',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTicketsRoute = AdminTicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminStaffRoute = AdminStaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminReportsRoute = AdminReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProductsRoute = AdminProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminEventsRoute = AdminEventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminEntriesRoute = AdminEntriesRouteImport.update({
+  id: '/entries',
+  path: '/entries',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBarsRoute = AdminBarsRouteImport.update({
+  id: '/bars',
+  path: '/bars',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -72,6 +126,15 @@ export interface FileRoutesByFullPath {
   '/entry': typeof EntryRoute
   '/login': typeof LoginRoute
   '/workstation': typeof WorkstationRouteWithChildren
+  '/admin/bars': typeof AdminBarsRoute
+  '/admin/entries': typeof AdminEntriesRoute
+  '/admin/events': typeof AdminEventsRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/staff': typeof AdminStaffRoute
+  '/admin/tickets': typeof AdminTicketsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/wristbands': typeof AdminWristbandsRoute
   '/workstation/bar': typeof WorkstationBarRoute
   '/workstation/entry': typeof WorkstationEntryRoute
   '/admin/': typeof AdminIndexRoute
@@ -82,6 +145,15 @@ export interface FileRoutesByTo {
   '/entry': typeof EntryRoute
   '/login': typeof LoginRoute
   '/workstation': typeof WorkstationRouteWithChildren
+  '/admin/bars': typeof AdminBarsRoute
+  '/admin/entries': typeof AdminEntriesRoute
+  '/admin/events': typeof AdminEventsRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/staff': typeof AdminStaffRoute
+  '/admin/tickets': typeof AdminTicketsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/wristbands': typeof AdminWristbandsRoute
   '/workstation/bar': typeof WorkstationBarRoute
   '/workstation/entry': typeof WorkstationEntryRoute
   '/admin': typeof AdminIndexRoute
@@ -94,6 +166,15 @@ export interface FileRoutesById {
   '/entry': typeof EntryRoute
   '/login': typeof LoginRoute
   '/workstation': typeof WorkstationRouteWithChildren
+  '/admin/bars': typeof AdminBarsRoute
+  '/admin/entries': typeof AdminEntriesRoute
+  '/admin/events': typeof AdminEventsRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/staff': typeof AdminStaffRoute
+  '/admin/tickets': typeof AdminTicketsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/wristbands': typeof AdminWristbandsRoute
   '/workstation/bar': typeof WorkstationBarRoute
   '/workstation/entry': typeof WorkstationEntryRoute
   '/admin/': typeof AdminIndexRoute
@@ -107,6 +188,15 @@ export interface FileRouteTypes {
     | '/entry'
     | '/login'
     | '/workstation'
+    | '/admin/bars'
+    | '/admin/entries'
+    | '/admin/events'
+    | '/admin/products'
+    | '/admin/reports'
+    | '/admin/staff'
+    | '/admin/tickets'
+    | '/admin/users'
+    | '/admin/wristbands'
     | '/workstation/bar'
     | '/workstation/entry'
     | '/admin/'
@@ -117,6 +207,15 @@ export interface FileRouteTypes {
     | '/entry'
     | '/login'
     | '/workstation'
+    | '/admin/bars'
+    | '/admin/entries'
+    | '/admin/events'
+    | '/admin/products'
+    | '/admin/reports'
+    | '/admin/staff'
+    | '/admin/tickets'
+    | '/admin/users'
+    | '/admin/wristbands'
     | '/workstation/bar'
     | '/workstation/entry'
     | '/admin'
@@ -128,6 +227,15 @@ export interface FileRouteTypes {
     | '/entry'
     | '/login'
     | '/workstation'
+    | '/admin/bars'
+    | '/admin/entries'
+    | '/admin/events'
+    | '/admin/products'
+    | '/admin/reports'
+    | '/admin/staff'
+    | '/admin/tickets'
+    | '/admin/users'
+    | '/admin/wristbands'
     | '/workstation/bar'
     | '/workstation/entry'
     | '/admin/'
@@ -207,14 +315,95 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkstationBarRouteImport
       parentRoute: typeof WorkstationRoute
     }
+    '/admin/wristbands': {
+      id: '/admin/wristbands'
+      path: '/wristbands'
+      fullPath: '/admin/wristbands'
+      preLoaderRoute: typeof AdminWristbandsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/tickets': {
+      id: '/admin/tickets'
+      path: '/tickets'
+      fullPath: '/admin/tickets'
+      preLoaderRoute: typeof AdminTicketsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/staff': {
+      id: '/admin/staff'
+      path: '/staff'
+      fullPath: '/admin/staff'
+      preLoaderRoute: typeof AdminStaffRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/reports': {
+      id: '/admin/reports'
+      path: '/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AdminReportsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/products': {
+      id: '/admin/products'
+      path: '/products'
+      fullPath: '/admin/products'
+      preLoaderRoute: typeof AdminProductsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/events': {
+      id: '/admin/events'
+      path: '/events'
+      fullPath: '/admin/events'
+      preLoaderRoute: typeof AdminEventsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/entries': {
+      id: '/admin/entries'
+      path: '/entries'
+      fullPath: '/admin/entries'
+      preLoaderRoute: typeof AdminEntriesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/bars': {
+      id: '/admin/bars'
+      path: '/bars'
+      fullPath: '/admin/bars'
+      preLoaderRoute: typeof AdminBarsRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminBarsRoute: typeof AdminBarsRoute
+  AdminEntriesRoute: typeof AdminEntriesRoute
+  AdminEventsRoute: typeof AdminEventsRoute
+  AdminProductsRoute: typeof AdminProductsRoute
+  AdminReportsRoute: typeof AdminReportsRoute
+  AdminStaffRoute: typeof AdminStaffRoute
+  AdminTicketsRoute: typeof AdminTicketsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminWristbandsRoute: typeof AdminWristbandsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminBarsRoute: AdminBarsRoute,
+  AdminEntriesRoute: AdminEntriesRoute,
+  AdminEventsRoute: AdminEventsRoute,
+  AdminProductsRoute: AdminProductsRoute,
+  AdminReportsRoute: AdminReportsRoute,
+  AdminStaffRoute: AdminStaffRoute,
+  AdminTicketsRoute: AdminTicketsRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminWristbandsRoute: AdminWristbandsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
