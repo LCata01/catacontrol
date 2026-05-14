@@ -51,14 +51,18 @@ export function CloseShiftDialog({
     let peoplePaid = 0;
     const ticketBreakdown = new Map<string, { qty: number; people: number }>();
     const wristbandBreakdown = new Map<string, { qty: number }>();
+    const productBreakdown = new Map<string, { qty: number }>();
     // Build a set of cancelled sale_ids to exclude their items
     const cancelledSaleIds = new Set(summary.sales.filter((s: any) => s.cancelled).map((s: any) => s.id));
     for (const it of summary.items) {
       if (cancelledSaleIds.has((it as any).sale_id)) continue;
       const q = Number(it.quantity || 0);
       const name = String(it.name || "—");
-      if (it.item_kind === "product") productsSold += q;
-      else if (it.item_kind === "ticket") {
+      if (it.item_kind === "product") {
+        productsSold += q;
+        const cur = productBreakdown.get(name) ?? { qty: 0 };
+        productBreakdown.set(name, { qty: cur.qty + q });
+      } else if (it.item_kind === "ticket") {
         ticketsSold += q;
         const people = Number(it.people_count || 0);
         peoplePaid += people;
@@ -69,6 +73,13 @@ export function CloseShiftDialog({
         const cur = wristbandBreakdown.get(name) ?? { qty: 0 };
         wristbandBreakdown.set(name, { qty: cur.qty + q });
       }
+    }
+    const consBreakdown = new Map<string, { qty: number }>();
+    for (const c of summary.cons) {
+      const name = String((c as any).product_name || "—");
+      const q = Number((c as any).quantity || 0);
+      const cur = consBreakdown.get(name) ?? { qty: 0 };
+      consBreakdown.set(name, { qty: cur.qty + q });
     }
     const compBreakdown = new Map<string, { qty: number; people: number }>();
     for (const c of summary.comps) {
@@ -81,10 +92,12 @@ export function CloseShiftDialog({
     const compsCount = summary.comps.reduce((s: number, x: any) => s + Number(x.quantity || 0), 0);
     const peopleComp = summary.comps.reduce((s: number, x: any) => s + Number(x.people_count || x.quantity || 0), 0);
     const consCount = summary.cons.reduce((s: number, x: any) => s + Number(x.quantity || 0), 0);
-    const ticketsByCategory = Array.from(ticketBreakdown.entries()).map(([name, v]) => ({ name, qty: v.qty, people: v.people })).sort((a, b) => a.name.localeCompare(b.name));
-    const wristbandsByCategory = Array.from(wristbandBreakdown.entries()).map(([name, v]) => ({ name, qty: v.qty })).sort((a, b) => a.name.localeCompare(b.name));
-    const compsByCategory = Array.from(compBreakdown.entries()).map(([name, v]) => ({ name, qty: v.qty, people: v.people })).sort((a, b) => a.name.localeCompare(b.name));
-    return { byPay, revenue, paidCount, productsSold, ticketsSold, wristbandsSold, compsCount, consCount, peoplePaid, peopleComp, ticketsByCategory, wristbandsByCategory, compsByCategory };
+    const ticketsByCategory = Array.from(ticketBreakdown.entries()).map(([name, v]) => ({ name, qty: v.qty, people: v.people })).sort((a, b) => b.qty - a.qty);
+    const wristbandsByCategory = Array.from(wristbandBreakdown.entries()).map(([name, v]) => ({ name, qty: v.qty })).sort((a, b) => b.qty - a.qty);
+    const compsByCategory = Array.from(compBreakdown.entries()).map(([name, v]) => ({ name, qty: v.qty, people: v.people })).sort((a, b) => b.qty - a.qty);
+    const productsByCategory = Array.from(productBreakdown.entries()).map(([name, v]) => ({ name, qty: v.qty })).sort((a, b) => b.qty - a.qty);
+    const consByCategory = Array.from(consBreakdown.entries()).map(([name, v]) => ({ name, qty: v.qty })).sort((a, b) => b.qty - a.qty);
+    return { byPay, revenue, paidCount, productsSold, ticketsSold, wristbandsSold, compsCount, consCount, peoplePaid, peopleComp, ticketsByCategory, wristbandsByCategory, compsByCategory, productsByCategory, consByCategory };
   })();
 
   const confirm = async () => {
@@ -124,6 +137,8 @@ export function CloseShiftDialog({
         ticketsByCategory: totals.ticketsByCategory,
         wristbandsByCategory: totals.wristbandsByCategory,
         compsByCategory: totals.compsByCategory,
+        productsByCategory: totals.productsByCategory,
+        consByCategory: totals.consByCategory,
       }).catch((e: any) => {
         toast.error(`No se pudo imprimir el cierre: ${e?.message ?? e}`);
       });
@@ -149,7 +164,27 @@ export function CloseShiftDialog({
           {kind === "bar" && <>
             <Row k="Ventas pagadas" v={String(totals?.paidCount ?? 0)} />
             <Row k="Productos vendidos" v={String(totals?.productsSold ?? 0)} />
+            {totals?.productsByCategory.length ? (
+              <div className="ml-4 grid gap-1 border-l-2 border-border pl-3 text-xs">
+                {totals.productsByCategory.map((p) => (
+                  <div key={`pr-${p.name}`} className="flex justify-between">
+                    <span className="text-muted-foreground">{p.name}</span>
+                    <span>x{p.qty}</span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
             <Row k="Consumos staff" v={String(totals?.consCount ?? 0)} />
+            {totals?.consByCategory.length ? (
+              <div className="ml-4 grid gap-1 border-l-2 border-border pl-3 text-xs">
+                {totals.consByCategory.map((c) => (
+                  <div key={`cs-${c.name}`} className="flex justify-between">
+                    <span className="text-muted-foreground">{c.name}</span>
+                    <span>x{c.qty}</span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </>}
           {kind === "entry" && <>
             <Row k="Tickets pagados" v={String(totals?.ticketsSold ?? 0)} />

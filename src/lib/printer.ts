@@ -210,6 +210,8 @@ export type ShiftCloseTicketOpts = {
   ticketsByCategory?: { name: string; qty: number; people: number }[];
   wristbandsByCategory?: { name: string; qty: number }[];
   compsByCategory?: { name: string; qty: number; people: number }[];
+  productsByCategory?: { name: string; qty: number }[];
+  consByCategory?: { name: string; qty: number }[];
 };
 
 function buildShiftCloseHtml(o: ShiftCloseTicketOpts): string {
@@ -237,8 +239,11 @@ function buildShiftCloseHtml(o: ShiftCloseTicketOpts): string {
   const barRows = o.kind === "bar"
     ? `
       <div class="row"><span>VENTAS PAGADAS</span><span>${o.paidCount ?? 0}</span></div>
-      <div class="row"><span>PRODUCTOS</span><span>${o.productsSold ?? 0}</span></div>
-      <div class="row"><span>CONSUMOS STAFF</span><span>${o.consCount ?? 0}</span></div>`
+      <div class="row bold"><span>PRODUCTOS</span><span>${o.productsSold ?? 0}</span></div>
+      ${breakdownRows("DETALLE PRODUCTOS", o.productsByCategory, false)}
+      <div class="hr"></div>
+      <div class="row bold"><span>CONSUMOS STAFF</span><span>${o.consCount ?? 0}</span></div>
+      ${breakdownRows("DETALLE CONSUMOS", o.consByCategory, false)}`
     : `
       <div class="row bold"><span>TICKETS PAGADOS</span><span>${o.ticketsSold ?? 0}</span></div>
       ${breakdownRows("POR CATEGORIA", o.ticketsByCategory, true)}
