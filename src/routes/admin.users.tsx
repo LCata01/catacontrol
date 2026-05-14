@@ -5,6 +5,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { updateUserCredentials } from "@/lib/admin-users.functions";
+import { PasswordInput } from "@/components/PasswordInput";
 
 export const Route = createFileRoute("/admin/users")({ component: UsersPage });
 
@@ -194,10 +195,9 @@ function EditUserDialog({
             <span className="mb-1 block text-xs uppercase tracking-widest text-muted-foreground">
               Nueva contraseña (dejar vacío para no cambiar)
             </span>
-            <input
-              type="text"
+            <PasswordInput
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
               className="w-full rounded border border-border bg-input px-3 py-2"
               minLength={6}
               maxLength={72}
