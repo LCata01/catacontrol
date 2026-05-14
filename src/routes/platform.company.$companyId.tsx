@@ -135,7 +135,7 @@ function CompanyDetailPage() {
                           try {
                             await updateUser({ data: { companyId, targetUserId: u.id, active: !u.active } });
                             qc.invalidateQueries({ queryKey: ["platform-company-users", companyId] });
-                          } catch (e: any) { toast.error(e.message); }
+                          } catch (e: any) { toast.error(prettifyError(e)); }
                         }}
                         className="rounded border border-border px-3 py-1 text-xs hover:bg-accent"
                       >
@@ -163,7 +163,7 @@ function CompanyDetailPage() {
               toast.success("Usuario actualizado");
               setEditing(null);
               qc.invalidateQueries({ queryKey: ["platform-company-users", companyId] });
-            } catch (e: any) { toast.error(e.message); }
+            } catch (e: any) { toast.error(prettifyError(e)); }
           }}
         />
       )}
