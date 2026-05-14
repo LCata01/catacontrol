@@ -32,7 +32,7 @@ async function fetchLocal(path: string, init?: RequestInit): Promise<Response> {
     headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
   };
   try {
-    return await fetch(url, { ...baseInit, targetAddressSpace: "loopback" } as LnaRequestInit);
+    return await fetch(url, { ...baseInit, targetAddressSpace: "local" } as LnaRequestInit);
   } catch {
     return fetch(url, baseInit);
   }
@@ -98,11 +98,17 @@ async function req<T = any>(path: string, init?: RequestInit): Promise<T> {
 
 async function reqWithWsFallback<T = any>(path: string, action: string, payload?: any, init?: RequestInit): Promise<T> {
   try {
-    return await req<T>(path, init);
-  } catch (error: any) {
-    const blocked = String(error?.message ?? error).includes("Failed to fetch") || String(error?.message ?? error).includes("NetworkError");
-    if (!blocked) throw error;
-    return wsReq<T>(action, payload);
+    return await wsReq<T>(action, payload);
+  } catch (wsError: any) {
+    try {
+      return await req<T>(path, init);
+    } catch (httpError: any) {
+      const blocked = String(httpError?.message ?? httpError).includes("Failed to fetch") || String(httpError?.message ?? httpError).includes("NetworkError");
+      if (blocked) {
+        throw new Error("Chrome bloqueó el acceso local a CATAPRINT. Actualizá y reiniciá CATAPRINT; si seguís en Preview, probá desde la app publicada.");
+      }
+      throw wsError?.message ? httpError : wsError;
+    }
   }
 }
 
@@ -111,15 +117,15 @@ export const cataprintService: PrintService = {
 
   async isAvailable() {
     try {
+      await wsReq("health");
+      return true;
+    } catch {
+      try {
       const ctl = new AbortController();
       const t = setTimeout(() => ctl.abort(), 1500);
       const res = await fetchLocal("/health", { signal: ctl.signal });
       clearTimeout(t);
       return res.ok;
-    } catch {
-      try {
-        await wsReq("health");
-        return true;
       } catch {
         return false;
       }
