@@ -13,12 +13,15 @@ function LiveOps() {
   const { data, refetch } = useQuery({
     queryKey: ["live-ops"],
     queryFn: async () => {
-      const [{ data: event }, { data: shifts }, { data: sales }, { data: cons }, { data: comps }] = await Promise.all([
-        supabase.from("events").select("*").eq("status", "active").maybeSingle(),
-        supabase.from("shifts").select("*, profiles!shifts_user_id_fkey(username), bars(name), entries(name)").eq("status", "open"),
-        supabase.from("sales").select("id, total, payment_method, bar_id, entry_id, shift_id, cancelled, sale_items(item_kind, quantity, people_count)"),
-        supabase.from("staff_consumptions").select("id, quantity"),
-        supabase.from("complimentary_tickets").select("id, quantity, people_count"),
+      const { data: event } = await supabase.from("events").select("*").eq("status", "active").maybeSingle();
+      if (!event) {
+        return { event: null, shifts: [], sales: [], cons: [], comps: [] };
+      }
+      const [{ data: shifts }, { data: sales }, { data: cons }, { data: comps }] = await Promise.all([
+        supabase.from("shifts").select("*, profiles!shifts_user_id_fkey(username), bars(name), entries(name)").eq("status", "open").eq("event_id", event.id),
+        supabase.from("sales").select("id, total, payment_method, bar_id, entry_id, shift_id, cancelled, sale_items(item_kind, quantity, people_count)").eq("event_id", event.id),
+        supabase.from("staff_consumptions").select("id, quantity").eq("event_id", event.id),
+        supabase.from("complimentary_tickets").select("id, quantity, people_count").eq("event_id", event.id),
       ]);
       return { event, shifts: shifts ?? [], sales: sales ?? [], cons: cons ?? [], comps: comps ?? [] };
     },
