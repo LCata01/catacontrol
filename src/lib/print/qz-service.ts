@@ -172,7 +172,9 @@ export const qzPrintService: PrintService = {
       margins: 0,
     });
 
-    const data: QzPrintData[] = [{ type: "pixel", format: "html", flavor: "plain", data: input.html }];
+    const data: QzPrintData[] = [
+      { type: "pixel", format: "html", flavor: "plain", data: input.html },
+    ];
 
     // Append cutter as raw ESC/POS to the same job (most drivers honor mixed).
     if (!input.noCut && caps.autoCutter !== "none") {
