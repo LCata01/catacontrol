@@ -908,6 +908,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_company_secure: {
+        Args: { _code: string; _name: string; _password: string }
+        Returns: {
+          active: boolean
+          code: string
+          created_at: string
+          id: string
+          name: string
+          password_hash: string
+          subdomain: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "companies"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       current_company_id: { Args: never; Returns: string }
       current_username: { Args: never; Returns: string }
       has_role: {
@@ -918,6 +936,14 @@ export type Database = {
         Returns: boolean
       }
       is_platform_admin: { Args: { _user_id: string }; Returns: boolean }
+      set_company_password: {
+        Args: { _id: string; _password: string }
+        Returns: undefined
+      }
+      verify_company_password: {
+        Args: { _code: string; _password: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "superadmin" | "cashier" | "disabled" | "platform_admin"
