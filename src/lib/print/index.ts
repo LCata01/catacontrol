@@ -4,6 +4,7 @@
 
 import { qzPrintService } from "./qz-service";
 import { cataprintService } from "./cataprint-service";
+import { browserPrintService } from "./browser-service";
 import type { PrintService, TicketPrintInput } from "./types";
 import { getActivePrinter } from "./storage";
 
@@ -12,12 +13,12 @@ export { getLastPrinter, setLastPrinter, getActivePrinter, setActivePrinter, get
 
 const DRIVER_KEY = "cata_print_driver";
 
-type DriverId = "cataprint" | "qz" | "auto";
+type DriverId = "cataprint" | "qz" | "browser" | "auto";
 
 function readDriverPref(): DriverId {
   if (typeof window === "undefined") return "auto";
   const v = localStorage.getItem(DRIVER_KEY);
-  if (v === "cataprint" || v === "qz" || v === "auto") return v;
+  if (v === "cataprint" || v === "qz" || v === "browser" || v === "auto") return v;
   return "auto";
 }
 
@@ -38,9 +39,11 @@ async function resolveService(): Promise<PrintService> {
   const pref = readDriverPref();
   if (pref === "qz") return qzPrintService;
   if (pref === "cataprint") return cataprintService;
-  // auto: prefer CATAPRINT, fall back to QZ
-  const cataOk = await cataprintService.isAvailable();
-  return cataOk ? cataprintService : qzPrintService;
+  if (pref === "browser") return browserPrintService;
+  // auto: prefer CATAPRINT, then QZ, finally browser fallback
+  if (await cataprintService.isAvailable()) return cataprintService;
+  if (await qzPrintService.isAvailable()) return qzPrintService;
+  return browserPrintService;
 }
 
 /** Sync getter — returns last resolved service or QZ as safe default. */
