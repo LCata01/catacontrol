@@ -9,7 +9,7 @@
 // Replaces QZ Tray. CATACONTROL talks to it via http://localhost:9100.
 
 const express = require("express");
-const cors = require("cors");
+// cors module no longer needed — manual middleware handles CORS + PNA.
 const path = require("path");
 const fs = require("fs");
 const os = require("os");
