@@ -49,16 +49,42 @@ export function CloseShiftDialog({
     let ticketsSold = 0;
     let wristbandsSold = 0;
     let peoplePaid = 0;
+    const ticketBreakdown = new Map<string, { qty: number; people: number }>();
+    const wristbandBreakdown = new Map<string, { qty: number }>();
+    // Build a set of cancelled sale_ids to exclude their items
+    const cancelledSaleIds = new Set(summary.sales.filter((s: any) => s.cancelled).map((s: any) => s.id));
     for (const it of summary.items) {
+      if (cancelledSaleIds.has((it as any).sale_id)) continue;
       const q = Number(it.quantity || 0);
+      const name = String(it.name || "—");
       if (it.item_kind === "product") productsSold += q;
-      else if (it.item_kind === "ticket") { ticketsSold += q; peoplePaid += Number(it.people_count || 0); }
-      else if (it.item_kind === "wristband") wristbandsSold += q;
+      else if (it.item_kind === "ticket") {
+        ticketsSold += q;
+        const people = Number(it.people_count || 0);
+        peoplePaid += people;
+        const cur = ticketBreakdown.get(name) ?? { qty: 0, people: 0 };
+        ticketBreakdown.set(name, { qty: cur.qty + q, people: cur.people + people });
+      } else if (it.item_kind === "wristband") {
+        wristbandsSold += q;
+        const cur = wristbandBreakdown.get(name) ?? { qty: 0 };
+        wristbandBreakdown.set(name, { qty: cur.qty + q });
+      }
+    }
+    const compBreakdown = new Map<string, { qty: number; people: number }>();
+    for (const c of summary.comps) {
+      const name = String((c as any).ticket_category || "—");
+      const q = Number((c as any).quantity || 0);
+      const people = Number((c as any).people_count || (c as any).quantity || 0);
+      const cur = compBreakdown.get(name) ?? { qty: 0, people: 0 };
+      compBreakdown.set(name, { qty: cur.qty + q, people: cur.people + people });
     }
     const compsCount = summary.comps.reduce((s: number, x: any) => s + Number(x.quantity || 0), 0);
     const peopleComp = summary.comps.reduce((s: number, x: any) => s + Number(x.people_count || x.quantity || 0), 0);
     const consCount = summary.cons.reduce((s: number, x: any) => s + Number(x.quantity || 0), 0);
-    return { byPay, revenue, paidCount, productsSold, ticketsSold, wristbandsSold, compsCount, consCount, peoplePaid, peopleComp };
+    const ticketsByCategory = Array.from(ticketBreakdown.entries()).map(([name, v]) => ({ name, qty: v.qty, people: v.people })).sort((a, b) => a.name.localeCompare(b.name));
+    const wristbandsByCategory = Array.from(wristbandBreakdown.entries()).map(([name, v]) => ({ name, qty: v.qty })).sort((a, b) => a.name.localeCompare(b.name));
+    const compsByCategory = Array.from(compBreakdown.entries()).map(([name, v]) => ({ name, qty: v.qty, people: v.people })).sort((a, b) => a.name.localeCompare(b.name));
+    return { byPay, revenue, paidCount, productsSold, ticketsSold, wristbandsSold, compsCount, consCount, peoplePaid, peopleComp, ticketsByCategory, wristbandsByCategory, compsByCategory };
   })();
 
   const confirm = async () => {
