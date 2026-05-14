@@ -38,6 +38,9 @@ app.use((req, res, next) => {
     "Access-Control-Allow-Headers",
     req.headers["access-control-request-headers"] || "Content-Type, Authorization",
   );
+  res.setHeader("Access-Control-Allow-Private-Network", "true");
+  res.setHeader("Private-Network-Access-Name", "cataprint");
+  res.setHeader("Private-Network-Access-ID", "02:ca:7a:00:00:01");
   // Chrome PNA — required when a public site calls a private-network address.
   if (req.headers["access-control-request-private-network"]) {
     res.setHeader("Access-Control-Allow-Private-Network", "true");
@@ -109,15 +112,108 @@ app.post("/print/test", async (req, res) => {
   }
 });
 
-app.listen(PORT, "127.0.0.1", () => {
+const server = app.listen(PORT, "127.0.0.1", () => {
   // eslint-disable-next-line no-console
   console.log(`CATAPRINT v${VERSION} listening on http://127.0.0.1:${PORT}`);
+});
+
+server.on("upgrade", (req, socket) => {
+  if (!req.url || new URL(req.url, `http://${req.headers.host}`).pathname !== "/ws") {
+    socket.destroy();
+    return;
+  }
+  const key = req.headers["sec-websocket-key"];
+  if (!key) { socket.destroy(); return; }
+  const accept = crypto
+    .createHash("sha1")
+    .update(`${key}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`)
+    .digest("base64");
+  socket.write([
+    "HTTP/1.1 101 Switching Protocols",
+    "Upgrade: websocket",
+    "Connection: Upgrade",
+    `Sec-WebSocket-Accept: ${accept}`,
+    "",
+    "",
+  ].join("\r\n"));
+
+  let buffer = Buffer.alloc(0);
+  socket.on("data", (chunk) => {
+    buffer = Buffer.concat([buffer, chunk]);
+    const parsed = readWsFrames(buffer);
+    buffer = parsed.rest;
+    parsed.messages.forEach((msg) => handleWsMessage(socket, msg));
+  });
 });
 
 function escapeHtml(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) => (
     { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]
   ));
+}
+
+async function handleWsMessage(socket, raw) {
+  let msg;
+  try { msg = JSON.parse(raw); } catch { return writeWsText(socket, { ok: false, error: "Invalid JSON" }); }
+  const { id, action, payload = {} } = msg ?? {};
+  try {
+    let result;
+    if (action === "health") {
+      result = { ok: true, service: "cataprint", version: VERSION, platform: process.platform };
+    } else if (action === "printers") {
+      result = { printers: await printers.list() };
+    } else if (action === "capabilities") {
+      result = await printers.capabilities(payload.name);
+    } else if (action === "print") {
+      if (!payload.printer) throw new Error("Missing 'printer'");
+      if (!payload.html && !payload.raw) throw new Error("Missing 'html' or 'raw'");
+      await printer.print(payload);
+      result = { ok: true };
+    } else {
+      throw new Error(`Unknown action: ${action}`);
+    }
+    writeWsText(socket, { id, ok: true, result });
+  } catch (e) {
+    writeWsText(socket, { id, ok: false, error: String(e?.message ?? e) });
+  }
+}
+
+function readWsFrames(buffer) {
+  const messages = [];
+  let offset = 0;
+  while (buffer.length - offset >= 2) {
+    const b1 = buffer[offset++];
+    const b2 = buffer[offset++];
+    const opcode = b1 & 0x0f;
+    const masked = (b2 & 0x80) !== 0;
+    let len = b2 & 0x7f;
+    if (len === 126) {
+      if (buffer.length - offset < 2) { offset -= 2; break; }
+      len = buffer.readUInt16BE(offset); offset += 2;
+    } else if (len === 127) {
+      if (buffer.length - offset < 8) { offset -= 2; break; }
+      len = Number(buffer.readBigUInt64BE(offset)); offset += 8;
+    }
+    const maskOffset = masked ? 4 : 0;
+    if (buffer.length - offset < maskOffset + len) { offset -= 2; break; }
+    const mask = masked ? buffer.subarray(offset, offset + 4) : null;
+    offset += maskOffset;
+    const payload = Buffer.from(buffer.subarray(offset, offset + len));
+    offset += len;
+    if (mask) for (let i = 0; i < payload.length; i++) payload[i] ^= mask[i % 4];
+    if (opcode === 1) messages.push(payload.toString("utf8"));
+  }
+  return { messages, rest: buffer.subarray(offset) };
+}
+
+function writeWsText(socket, data) {
+  const payload = Buffer.from(JSON.stringify(data));
+  const header = payload.length < 126
+    ? Buffer.from([0x81, payload.length])
+    : payload.length < 65536
+      ? Buffer.from([0x81, 126, payload.length >> 8, payload.length & 255])
+      : Buffer.from([0x81, 127, 0, 0, 0, 0, (payload.length / 0x1000000) & 255, (payload.length / 0x10000) & 255, (payload.length / 0x100) & 255, payload.length & 255]);
+  socket.write(Buffer.concat([header, payload]));
 }
 
 // Silence unused requires of node-only modules
