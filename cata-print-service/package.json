@@ -1,0 +1,72 @@
+{
+  "name": "cata-print-service",
+  "productName": "CATA PRINT SERVICE",
+  "version": "1.0.0",
+  "description": "Servicio local de impresión térmica ESC/POS para CATA CONTROL. Reemplaza a QZ Tray.",
+  "main": "dist/main.js",
+  "author": {
+    "name": "CATA CONTROL",
+    "email": "soporte@catacontrol.app"
+  },
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && copyfiles -u 1 \"src/ui/**/*\" dist && copyfiles -u 0 \"assets/**/*\" dist",
+    "start": "npm run build && electron .",
+    "dev": "npm run build && electron . --dev",
+    "dist:win": "npm run build && electron-builder --win --x64",
+    "dist:mac": "npm run build && electron-builder --mac"
+  },
+  "dependencies": {
+    "auto-launch": "^5.0.6",
+    "node-thermal-printer": "^4.4.4",
+    "qrcode": "^1.5.4",
+    "winston": "^3.13.0",
+    "ws": "^8.17.1"
+  },
+  "devDependencies": {
+    "@types/auto-launch": "^5.0.5",
+    "@types/node": "^20.12.12",
+    "@types/qrcode": "^1.5.5",
+    "@types/ws": "^8.5.10",
+    "copyfiles": "^2.4.1",
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3",
+    "typescript": "^5.4.5"
+  },
+  "build": {
+    "appId": "app.catacontrol.printservice",
+    "productName": "CATA PRINT SERVICE",
+    "files": [
+      "dist/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release",
+      "buildResources": "assets"
+    },
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "CATA PRINT SERVICE",
+      "uninstallDisplayName": "CATA PRINT SERVICE",
+      "deleteAppDataOnUninstall": true
+    },
+    "mac": {
+      "target": ["dmg"],
+      "icon": "assets/icon.icns",
+      "category": "public.app-category.utilities"
+    },
+    "extraMetadata": {
+      "main": "dist/main.js"
+    }
+  }
+}
