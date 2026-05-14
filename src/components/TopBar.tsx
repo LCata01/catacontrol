@@ -9,12 +9,10 @@ export function TopBar({ title, right, back }: { title: string; right?: ReactNod
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    // Auto-close any open shift to release the terminal
+    // Cashiers must close their shift before logging out
     if (lock?.shiftId) {
-      await supabase.from("shifts").update({
-        status: "closed",
-        closed_at: new Date().toISOString(),
-      }).eq("id", lock.shiftId).eq("status", "open");
+      alert("DEBE CERRAR EL TURNO ANTES DE SALIR\n\nUse el botón \"Cerrar Turno\" para finalizar la caja.");
+      return;
     }
     await signOut();
     navigate({ to: "/login" });
