@@ -11,6 +11,7 @@ export type Field = {
   /** Load select options dynamically from a Supabase table. */
   optionsFrom?: { table: string; valueColumn?: string; labelColumn?: string; activeOnly?: boolean };
   required?: boolean;
+  readonly?: boolean;
 };
 
 export function CrudTable({
@@ -34,6 +35,7 @@ export function CrudTable({
   const save = async (row: any) => {
     const payload = { ...row };
     delete payload.id; delete payload.created_at;
+    fields.filter(f => f.readonly).forEach(f => { delete payload[f.key]; });
     if (editing?.id) {
       const { error } = await supabase.from(table as any).update(payload).eq("id", editing.id);
       if (error) return toast.error(error.message);
@@ -116,7 +118,11 @@ function Editor({ row, fields, title, onCancel, onSave }: {
           {fields.map(f => (
             <div key={f.key}>
               <label className="mb-1 block text-xs uppercase tracking-widest text-muted-foreground">{f.label}</label>
-              {f.type === "select" ? (
+              {f.readonly ? (
+                <div className="w-full rounded-lg border border-border bg-muted px-3 py-2.5 text-muted-foreground">
+                  {val[f.key] ?? "— (se genera automáticamente)"}
+                </div>
+              ) : f.type === "select" ? (
                 <DynamicSelect field={f} value={val[f.key] ?? ""} onChange={(v) => update(f.key, v)} />
               ) : f.type === "checkbox" ? (
                 <label className="flex items-center gap-2"><input type="checkbox" checked={!!val[f.key]} onChange={(e) => update(f.key, e.target.checked)} /> {f.label}</label>

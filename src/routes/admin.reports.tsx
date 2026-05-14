@@ -73,7 +73,7 @@ function SalesReport() {
     queryKey: ["report-sales"],
     queryFn: async () => {
       const { data, error } = await supabase.from("sales")
-        .select("sale_number, created_at, total, payment_method, cancelled, user_id, bar_id, entry_id, event_id")
+        .select("sale_number, ticket_number, created_at, total, payment_method, cancelled, user_id, bar_id, entry_id, event_id")
         .order("created_at", { ascending: false }).limit(500);
       if (error) { toast.error(error.message); throw error; }
       return data!;
@@ -83,7 +83,7 @@ function SalesReport() {
   if (error) return <ErrorBox e={error} />;
   const L = lookups.data!;
   const rows = (data ?? []).map((s: any) => ({
-    number: s.sale_number, date: s.created_at,
+    number: s.ticket_number ?? s.sale_number, date: s.created_at,
     user: L.profiles[s.user_id]?.username,
     location: L.bars[s.bar_id]?.name || L.entries[s.entry_id]?.name,
     event: L.events[s.event_id]?.name,

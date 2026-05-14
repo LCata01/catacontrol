@@ -4,6 +4,7 @@ import { CrudTable } from "@/components/CrudTable";
 export const Route = createFileRoute("/admin/entries")({ component: () => (
   <CrudTable table="entries" title="Entradas" fields={[
     { key: "name", label: "Nombre" },
+    { key: "terminal_code", label: "Código", readonly: true },
     { key: "active", label: "Activa", type: "checkbox" },
   ]} defaults={{ active: true }} />
 )});
