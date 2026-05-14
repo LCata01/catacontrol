@@ -86,7 +86,7 @@ function CompanyDetailPage() {
                 toast.success("Usuario creado");
                 setShowNew(false);
                 qc.invalidateQueries({ queryKey: ["platform-company-users", companyId] });
-              } catch (e: any) { toast.error(e.message); }
+              } catch (e: any) { toast.error(prettifyError(e)); }
             }}
           />
         )}
