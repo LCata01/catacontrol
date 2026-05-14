@@ -121,6 +121,9 @@ export function CloseShiftDialog({
         wristbandsSold: totals.wristbandsSold,
         compsCount: totals.compsCount,
         peopleComp: totals.peopleComp,
+        ticketsByCategory: totals.ticketsByCategory,
+        wristbandsByCategory: totals.wristbandsByCategory,
+        compsByCategory: totals.compsByCategory,
       }).catch((e: any) => {
         toast.error(`No se pudo imprimir el cierre: ${e?.message ?? e}`);
       });
