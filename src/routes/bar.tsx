@@ -155,13 +155,13 @@ function BarPos() {
             placeholder="Buscar producto…"
             className="mb-4 w-full rounded-lg border border-border bg-input px-4 py-3 outline-none focus:ring-2 ring-ring"
           />
-          <div className="grid flex-1 grid-cols-2 gap-3 overflow-auto sm:grid-cols-3 md:grid-cols-4">
+          <div className="grid flex-1 grid-cols-3 gap-2 overflow-auto sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 auto-rows-min content-start">
             {filtered.map((p: any) => (
               <button key={p.id} onClick={() => add(p)}
-                className="aspect-square rounded-xl border border-border bg-background p-3 text-left hover:border-primary">
-                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{p.category}</div>
-                <div className="mt-1 text-base font-bold leading-tight">{p.name}</div>
-                <div className="mt-auto pt-3 text-xl font-black">{money(p.price)}</div>
+                className="flex flex-col rounded-lg border border-border bg-background p-2 text-left hover:border-primary">
+                <div className="text-[9px] uppercase tracking-wider text-muted-foreground truncate">{p.category}</div>
+                <div className="mt-0.5 text-sm font-bold leading-tight line-clamp-2">{p.name}</div>
+                <div className="mt-1 text-base font-black">{money(p.price)}</div>
               </button>
             ))}
           </div>
