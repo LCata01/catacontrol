@@ -205,6 +205,19 @@ export function PrinterSetup({
         </p>
       )}
 
+      <div className="mt-6 border-t border-border pt-4">
+        <button
+          onClick={bypass}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border px-4 py-3 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:bg-accent hover:text-foreground"
+        >
+          <BellOff className="h-4 w-4" />
+          Continuar sin impresora
+        </button>
+        <p className="mt-2 text-center text-[11px] text-muted-foreground">
+          No se imprimirán tickets en esta sesión.
+        </p>
+      </div>
+
       {onCancel && (
         <div className="mt-4 text-center">
           <button onClick={onCancel} className="text-xs text-muted-foreground hover:underline">
