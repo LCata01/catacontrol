@@ -38,6 +38,9 @@ app.use((req, res, next) => {
     "Access-Control-Allow-Headers",
     req.headers["access-control-request-headers"] || "Content-Type, Authorization",
   );
+  res.setHeader("Access-Control-Allow-Private-Network", "true");
+  res.setHeader("Private-Network-Access-Name", "cataprint");
+  res.setHeader("Private-Network-Access-ID", "02:ca:7a:00:00:01");
   // Chrome PNA — required when a public site calls a private-network address.
   if (req.headers["access-control-request-private-network"]) {
     res.setHeader("Access-Control-Allow-Private-Network", "true");
@@ -109,9 +112,38 @@ app.post("/print/test", async (req, res) => {
   }
 });
 
-app.listen(PORT, "127.0.0.1", () => {
+const server = app.listen(PORT, "127.0.0.1", () => {
   // eslint-disable-next-line no-console
   console.log(`CATAPRINT v${VERSION} listening on http://127.0.0.1:${PORT}`);
+});
+
+server.on("upgrade", (req, socket) => {
+  if (!req.url || new URL(req.url, `http://${req.headers.host}`).pathname !== "/ws") {
+    socket.destroy();
+    return;
+  }
+  const key = req.headers["sec-websocket-key"];
+  if (!key) { socket.destroy(); return; }
+  const accept = crypto
+    .createHash("sha1")
+    .update(`${key}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`)
+    .digest("base64");
+  socket.write([
+    "HTTP/1.1 101 Switching Protocols",
+    "Upgrade: websocket",
+    "Connection: Upgrade",
+    `Sec-WebSocket-Accept: ${accept}`,
+    "",
+    "",
+  ].join("\r\n"));
+
+  let buffer = Buffer.alloc(0);
+  socket.on("data", (chunk) => {
+    buffer = Buffer.concat([buffer, chunk]);
+    const parsed = readWsFrames(buffer);
+    buffer = parsed.rest;
+    parsed.messages.forEach((msg) => handleWsMessage(socket, msg));
+  });
 });
 
 function escapeHtml(s) {
