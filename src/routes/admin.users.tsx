@@ -197,7 +197,7 @@ function EditUserDialog({
             </span>
             <PasswordInput
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
               className="w-full rounded border border-border bg-input px-3 py-2"
               minLength={6}
               maxLength={72}
