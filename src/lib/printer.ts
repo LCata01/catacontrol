@@ -210,6 +210,8 @@ export type ShiftCloseTicketOpts = {
   ticketsByCategory?: { name: string; qty: number; people: number }[];
   wristbandsByCategory?: { name: string; qty: number }[];
   compsByCategory?: { name: string; qty: number; people: number }[];
+  productsByCategory?: { name: string; qty: number }[];
+  consByCategory?: { name: string; qty: number }[];
 };
 
 function buildShiftCloseHtml(o: ShiftCloseTicketOpts): string {
