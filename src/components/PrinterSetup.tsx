@@ -102,6 +102,18 @@ export function PrinterSetup({
     onReady();
   };
 
+  const bypass = () => {
+    const ok = window.confirm(
+      "¿Continuar SIN impresora?\n\nNo se imprimirán tickets en esta sesión (ventas, staff, cierre de turno). Las ventas se siguen registrando normalmente.",
+    );
+    if (!ok) return;
+    setActivePrinter({ name: "(sin impresora)", cutter: "none", bypass: true });
+    toast.message("Modo sin impresión activado", {
+      description: "No se imprimirán tickets en esta sesión.",
+    });
+    onReady();
+  };
+
   const canConfirm = !!selected && testedFor === selected && !!caps;
 
   return (
