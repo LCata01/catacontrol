@@ -11,6 +11,10 @@ import { toast } from "sonner";
 import { money } from "@/lib/format";
 import { CloseShiftDialog } from "@/components/CloseShiftDialog";
 import { ComplimentaryDialog } from "@/components/ComplimentaryDialog";
+import { PrinterStatus } from "@/components/PrinterStatus";
+import { PrinterSetup } from "@/components/PrinterSetup";
+import { getActivePrinter, setActivePrinter } from "@/lib/print";
+import { useTenant } from "@/lib/tenant-context";
 
 export const Route = createFileRoute("/entry")({
   component: () => <Guard requireRole="cashier" requireLock="entry"><EntryPos /></Guard>,
@@ -25,7 +29,9 @@ type CartItem = {
 
 function EntryPos() {
   const { userId, lock, setLock } = useAuth();
+  const { tenant } = useTenant();
   const navigate = useNavigate();
+  const [printerReady, setPrinterReady] = useState(() => !!getActivePrinter());
 
   const { data: event } = useQuery({ queryKey: ["active-event"], queryFn: getActiveEvent });
   const { data: shift, isLoading, refetch } = useQuery({
@@ -111,11 +117,40 @@ function EntryPos() {
   if (isLoading) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Cargando…</div>;
 
   if (!shift) {
+    const onChangeTerminal = () => {
+      setActivePrinter(null);
+      setLock(null);
+      navigate({ to: "/workstation" });
+    };
+    if (!printerReady) {
+      return (
+        <div className="min-h-screen">
+          <TopBar title={`ENTRADA · ${lock?.name}`} right={
+            <button onClick={onChangeTerminal}
+              className="rounded-md border border-border px-3 py-2 text-sm hover:bg-accent">Cambiar</button>
+          } />
+          <PrinterSetup
+            tenantId={tenant?.id}
+            tenantName={tenant?.name ?? "CATACONTROL"}
+            terminalId={lock?.id}
+            terminalName={`ENTRADA · ${lock?.name ?? ""}`}
+            userId={userId}
+            onReady={() => setPrinterReady(true)}
+          />
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen">
         <TopBar title={`ENTRADA · ${lock?.name}`} right={
-          <button onClick={() => { setLock(null); navigate({ to: "/workstation" }); }}
-            className="rounded-md border border-border px-3 py-2 text-sm hover:bg-accent">Cambiar</button>
+          <div className="flex gap-2">
+            <PrinterStatus
+              tenantId={tenant?.id} tenantName={tenant?.name ?? "CATACONTROL"}
+              terminalId={lock?.id} terminalName={`ENTRADA · ${lock?.name ?? ""}`} userId={userId}
+            />
+            <button onClick={onChangeTerminal}
+              className="rounded-md border border-border px-3 py-2 text-sm hover:bg-accent">Cambiar</button>
+          </div>
         } />
         <ShiftOpener title={`Abrir turno — ${lock?.name}`} onOpen={openShift} busy={busy} />
       </div>
@@ -129,6 +164,10 @@ function EntryPos() {
       <TopBar title={`ENTRADA · ${lock?.name}`}
         right={
           <div className="flex gap-2">
+            <PrinterStatus
+              tenantId={tenant?.id} tenantName={tenant?.name ?? "CATACONTROL"}
+              terminalId={lock?.id} terminalName={`ENTRADA · ${lock?.name ?? ""}`} userId={userId}
+            />
             <button onClick={() => setOpenComp(true)}
               className="rounded-md border border-warning bg-card px-3 py-2 text-xs font-bold uppercase tracking-widest text-warning hover:bg-warning hover:text-warning-foreground">Cortesía</button>
             <button onClick={() => setOpenClose(true)}
@@ -214,7 +253,7 @@ function EntryPos() {
       )}
       {openClose && shift && (
         <CloseShiftDialog shift={shift} kind="entry" onClose={() => setOpenClose(false)}
-          onClosed={() => { setLock(null); navigate({ to: "/workstation" }); }} />
+          onClosed={() => { setActivePrinter(null); setPrinterReady(false); setLock(null); navigate({ to: "/workstation" }); }} />
       )}
     </div>
   );

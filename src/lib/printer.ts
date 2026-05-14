@@ -1,6 +1,8 @@
-// Browser-based ticket printing. Renders the ticket as HTML inside a hidden
-// iframe and triggers the browser's native print dialog. The user picks the
-// printer once in the dialog and can mark it as default.
+// Ticket HTML builders. Output is sent to the local print agent through the
+// PrintService abstraction (`@/lib/print`). Auto-cut is handled by the
+// service after every job — never inlined into the HTML here.
+
+import { getPrintService, getActivePrinter, printToActivePrinter } from "./print";
 
 type Line = { qty: number; name: string; unit: number; subtotal: number };
 
@@ -178,25 +180,44 @@ function printHtml(html: string) {
 }
 
 export async function printBarTicket(opts: BarTicketOpts) {
-  printHtml(buildBarHtml(opts));
+  await printToActivePrinter({ html: buildBarHtml(opts), title: `Ticket #${opts.number}` });
 }
 
 export async function printStaffTicket(opts: StaffTicketOpts) {
-  printHtml(buildStaffHtml(opts));
+  await printToActivePrinter({ html: buildStaffHtml(opts), title: "Staff drink" });
 }
 
-export function testPrint() {
-  printHtml(
-    buildBarHtml({
-      branding: { nightclub_name: "CATA CLUB" },
-      number: "TEST",
-      bar: "BARRA 1",
-      cashier: "TEST",
-      lines: [
-        { qty: 1, name: "PRUEBA DE IMPRESION", unit: 0, subtotal: 0 },
-      ],
-      total: 0,
-      payment: "test",
-    }),
+/** Build the standardized 80mm CATACONTROL test ticket. */
+export function buildTestTicketHtml(opts: { tenantName: string; terminalName: string }): string {
+  const now = new Date();
+  const date = now.toLocaleDateString("es-AR");
+  const time = now.toLocaleTimeString("es-AR", { hour12: false });
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Prueba</title><style>${TICKET_CSS}</style></head><body>
+    <div class="center big">CATACONTROL</div>
+    <div class="hr2"></div>
+    <div class="center bold">${escapeHtml(opts.tenantName.toUpperCase())}</div>
+    <div class="hr"></div>
+    <div class="row"><span>CAJA</span><span>${escapeHtml(opts.terminalName)}</span></div>
+    <div class="row"><span>FECHA</span><span>${date}</span></div>
+    <div class="row"><span>HORA</span><span>${time}</span></div>
+    <div class="hr"></div>
+    <div class="center huge">PRUEBA DE IMPRESIÓN</div>
+    <div style="height:8mm"></div>
+  </body></html>`;
+}
+
+/** Print the test ticket to a specific (not yet active) printer. */
+export async function printTestTo(printerName: string, opts: { tenantName: string; terminalName: string }) {
+  await getPrintService().printTest(printerName, buildTestTicketHtml(opts));
+}
+
+/** Legacy global "test print" — prints to the active session printer. */
+export async function testPrint() {
+  const a = getActivePrinter();
+  if (!a) throw new Error("Seleccione una impresora primero");
+  await getPrintService().printTest(
+    a.name,
+    buildTestTicketHtml({ tenantName: "CATACONTROL", terminalName: "—" }),
   );
 }
+
