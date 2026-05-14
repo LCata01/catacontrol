@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Printer, Scissors, CircleSlash } from "lucide-react";
+import { Printer, Scissors, CircleSlash, BellOff } from "lucide-react";
 import {
   Dialog,
   DialogContent,
