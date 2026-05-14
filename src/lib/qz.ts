@@ -48,7 +48,9 @@ export async function loadQz(): Promise<any> {
       const qz = window.qz!;
       qz.api.setPromiseType((resolver: any) => new Promise(resolver));
       // SHA512 is the QZ Tray 2.1+ default; declare explicitly.
-      try { qz.security.setSignatureAlgorithm("SHA512"); } catch {}
+      try {
+        qz.security.setSignatureAlgorithm("SHA512");
+      } catch {}
 
       const cert = await fetchCertificate();
       if (cert) {
@@ -92,9 +94,9 @@ export async function connectQz(): Promise<any> {
     }
   }
   console.error("QZ connect failed:", lastErr);
-  const msg = typeof lastErr === "string" ? lastErr : (lastErr?.message || "");
+  const msg = typeof lastErr === "string" ? lastErr : lastErr?.message || "";
   throw new Error(
-    `No se pudo conectar a QZ Tray. Abrí QZ Tray, verificá el ícono al lado del reloj y aceptá el certificado entrando a https://localhost.qz.io:8181/ desde este navegador. ${msg ? "(" + msg + ")" : ""}`.trim()
+    `No se pudo conectar a QZ Tray. Abrí QZ Tray, verificá el ícono al lado del reloj y aceptá el certificado entrando a https://localhost.qz.io:8181/ desde este navegador. ${msg ? "(" + msg + ")" : ""}`.trim(),
   );
 }
 
@@ -110,7 +112,9 @@ export async function isQzConnected(): Promise<boolean> {
 export async function disconnectQz(): Promise<void> {
   if (typeof window === "undefined" || !window.qz) return;
   if (window.qz.websocket.isActive()) {
-    try { await window.qz.websocket.disconnect(); } catch {}
+    try {
+      await window.qz.websocket.disconnect();
+    } catch {}
   }
 }
 
@@ -136,7 +140,9 @@ export function setSavedPrinter(name: string | null) {
   else localStorage.removeItem(PRINTER_KEY);
 }
 
-export async function printRaw(data: Array<string | { type: string; format: string; data: string }>) {
+export async function printRaw(
+  data: Array<string | { type: string; format: string; data: string }>,
+) {
   const qz = await connectQz();
   const printer = getSavedPrinter();
   if (!printer) throw new Error("No hay impresora configurada");
