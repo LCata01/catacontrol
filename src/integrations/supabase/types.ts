@@ -86,6 +86,36 @@ export type Database = {
         }
         Relationships: []
       }
+      companies: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          id: string
+          name: string
+          password_hash: string
+          subdomain: string | null
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          id?: string
+          name: string
+          password_hash: string
+          subdomain?: string | null
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          id?: string
+          name?: string
+          password_hash?: string
+          subdomain?: string | null
+        }
+        Relationships: []
+      }
       complimentary_tickets: {
         Row: {
           created_at: string
@@ -708,7 +738,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "superadmin" | "cashier" | "disabled"
+      app_role: "superadmin" | "cashier" | "disabled" | "platform_admin"
       payment_method: "cash" | "qr" | "card"
       shift_kind: "bar" | "entry"
       staff_category:
@@ -848,7 +878,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["superadmin", "cashier", "disabled"],
+      app_role: ["superadmin", "cashier", "disabled", "platform_admin"],
       payment_method: ["cash", "qr", "card"],
       shift_kind: ["bar", "entry"],
       staff_category: [
