@@ -57,30 +57,25 @@ export function CrudTable({
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-black uppercase">{title}</h2>
         <button onClick={() => { setEditing({ ...defaults }); setCreating(true); }}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-bold uppercase tracking-widest text-primary-foreground">+ New</button>
+          className="rounded-md bg-primary px-4 py-2 text-sm font-bold uppercase tracking-widest text-primary-foreground">+ Nuevo</button>
       </div>
       <div className="overflow-auto rounded-xl border border-border bg-card">
         <table className="w-full text-sm">
           <thead className="bg-muted text-left text-xs uppercase tracking-widest text-muted-foreground">
-            <tr>{fields.map(f => <th key={f.key} className="px-4 py-3">{f.label}</th>)}<th className="px-4 py-3 text-right">Actions</th></tr>
+            <tr>{fields.map(f => <th key={f.key} className="px-4 py-3">{f.label}</th>)}<th className="px-4 py-3 text-right">Acciones</th></tr>
           </thead>
           <tbody>
-            {isLoading && <tr><td colSpan={fields.length + 1} className="p-6 text-center text-muted-foreground">Loading…</td></tr>}
+            {isLoading && <tr><td colSpan={fields.length + 1} className="p-6 text-center text-muted-foreground">Cargando…</td></tr>}
             {data?.map((row: any) => (
               <tr key={row.id} className="border-t border-border">
                 {fields.map(f => <td key={f.key} className="px-4 py-3">{renderCell(row[f.key], f)}</td>)}
                 <td className="px-4 py-3 text-right">
-                  <button onClick={() => { setEditing(row); setCreating(false); }} className="mr-2 rounded border border-border px-3 py-1 text-xs">Edit</button>
-                  <button onClick={() => remove(row.id)} className="rounded border border-destructive px-3 py-1 text-xs text-destructive">Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                  <button onClick={() => { setEditing(row); setCreating(false); }} className="mr-2 rounded border border-border px-3 py-1 text-xs">Editar</button>
+                  <button onClick={() => remove(row.id)} className="rounded border border-destructive px-3 py-1 text-xs text-destructive">Eliminar</button>
+                </td></tr>))}</tbody></table></div>
 
       {(editing !== null) && (
-        <Editor row={editing} fields={fields} title={creating ? `New ${title}` : `Edit ${title}`}
+        <Editor row={editing} fields={fields} title={creating ? `Nuevo ${title}` : `Editar ${title}`}
           onCancel={() => { setEditing(null); setCreating(false); }} onSave={save} />
       )}
     </div>
