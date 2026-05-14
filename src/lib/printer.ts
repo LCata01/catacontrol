@@ -1,6 +1,8 @@
-// Browser-based ticket printing. Renders the ticket as HTML inside a hidden
-// iframe and triggers the browser's native print dialog. The user picks the
-// printer once in the dialog and can mark it as default.
+// Ticket HTML builders. Output is sent to the local print agent through the
+// PrintService abstraction (`@/lib/print`). Auto-cut is handled by the
+// service after every job — never inlined into the HTML here.
+
+import { getPrintService, getActivePrinter, printToActivePrinter } from "./print";
 
 type Line = { qty: number; name: string; unit: number; subtotal: number };
 
