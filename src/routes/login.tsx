@@ -26,10 +26,10 @@ function LoginPage() {
     setBusy(true);
     try {
       await signIn(u, p);
-      toast.success("Welcome");
+      toast.success("Bienvenido");
       navigate({ to: "/" });
     } catch (err: any) {
-      toast.error(err.message ?? "Login failed");
+      toast.error(err.message ?? "Error al ingresar");
     } finally {
       setBusy(false);
     }
@@ -40,11 +40,11 @@ function LoginPage() {
       <div className="w-full max-w-md">
         <div className="mb-10 text-center">
           <h1 className="text-5xl font-black tracking-tight">CATA<span className="text-muted-foreground"> </span>CONTROL</h1>
-          <p className="mt-2 text-sm uppercase tracking-[0.3em] text-muted-foreground">Nightclub Operations</p>
+          <p className="mt-2 text-sm uppercase tracking-[0.3em] text-muted-foreground">Operación de Boliche</p>
         </div>
         <form onSubmit={submit} className="space-y-4 rounded-2xl border border-border bg-card p-8">
           <div>
-            <label className="mb-2 block text-xs uppercase tracking-widest text-muted-foreground">Username</label>
+            <label className="mb-2 block text-xs uppercase tracking-widest text-muted-foreground">Usuario</label>
             <input
               autoFocus autoCapitalize="off" autoCorrect="off" autoComplete="username"
               value={u} onChange={(e) => setU(e.target.value)}
@@ -52,7 +52,7 @@ function LoginPage() {
             />
           </div>
           <div>
-            <label className="mb-2 block text-xs uppercase tracking-widest text-muted-foreground">Password</label>
+            <label className="mb-2 block text-xs uppercase tracking-widest text-muted-foreground">Contraseña</label>
             <input
               type="password" autoComplete="current-password"
               value={p} onChange={(e) => setP(e.target.value)}
@@ -62,9 +62,9 @@ function LoginPage() {
           <button
             type="submit" disabled={busy}
             className="w-full rounded-lg bg-primary py-5 text-lg font-bold uppercase tracking-widest text-primary-foreground disabled:opacity-50"
-          >{busy ? "…" : "Login"}</button>
+          >{busy ? "…" : "Ingresar"}</button>
         </form>
-        <p className="mt-6 text-center text-xs text-muted-foreground">No public access · No registration</p>
+        <p className="mt-6 text-center text-xs text-muted-foreground">Sin acceso público · Sin registro</p>
       </div>
     </div>
   );

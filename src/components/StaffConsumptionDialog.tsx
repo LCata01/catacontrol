@@ -6,13 +6,13 @@ import { toast } from "sonner";
 
 const CATEGORIES: { value: string; label: string }[] = [
   { value: "dj", label: "DJ" },
-  { value: "technical", label: "TECHNICAL" },
-  { value: "security", label: "SECURITY" },
-  { value: "photography", label: "PHOTOGRAPHY" },
+  { value: "technical", label: "TÉCNICO" },
+  { value: "security", label: "SEGURIDAD" },
+  { value: "photography", label: "FOTOGRAFÍA" },
   { value: "rrpp", label: "RRPP" },
-  { value: "owner", label: "OWNER" },
-  { value: "management", label: "MANAGEMENT" },
-  { value: "guest", label: "GUEST" },
+  { value: "owner", label: "DUEÑO" },
+  { value: "management", label: "GERENCIA" },
+  { value: "guest", label: "INVITADO" },
 ];
 
 export function StaffConsumptionDialog({
@@ -59,7 +59,7 @@ export function StaffConsumptionDialog({
     });
     setBusy(false);
     if (error) { toast.error(error.message); return; }
-    toast.success("Staff consumption logged");
+    toast.success("Consumo de staff registrado");
     onClose();
   };
 
@@ -67,13 +67,13 @@ export function StaffConsumptionDialog({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
       <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-6">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-xl font-bold">STAFF CONSUMPTION · Step {step}/3</h3>
+          <h3 className="text-xl font-bold">CONSUMO STAFF · Paso {step}/3</h3>
           <button onClick={onClose} className="text-2xl text-muted-foreground">×</button>
         </div>
 
         {step === 1 && (
           <div>
-            <p className="mb-3 text-sm text-muted-foreground">SELECT STAFF CATEGORY</p>
+            <p className="mb-3 text-sm text-muted-foreground">SELECCIONAR CATEGORÍA DE STAFF</p>
             <div className="grid grid-cols-2 gap-2">
               {CATEGORIES.map((c) => (
                 <button key={c.value}
@@ -88,25 +88,25 @@ export function StaffConsumptionDialog({
 
         {step === 2 && (
           <div>
-            <p className="mb-3 text-sm">Category: <b>{CATEGORIES.find(c => c.value === category)?.label}</b></p>
-            <label className="mb-1 block text-xs uppercase tracking-widest text-muted-foreground">Select staff member</label>
+            <p className="mb-3 text-sm">Categoría: <b>{CATEGORIES.find(c => c.value === category)?.label}</b></p>
+            <label className="mb-1 block text-xs uppercase tracking-widest text-muted-foreground">Seleccionar persona</label>
             <select value={staffId} onChange={(e) => setStaffId(e.target.value)}
               className="mb-4 w-full rounded-lg border border-border bg-input px-4 py-3 outline-none focus:ring-2 ring-ring">
-              <option value="">— choose —</option>
+              <option value="">— elegir —</option>
               {staffList?.map((s: any) => (
                 <option key={s.id} value={s.id}>{s.full_name}</option>
               ))}
             </select>
             {staffList && staffList.length === 0 && (
               <div className="rounded-lg border border-destructive p-3 text-center text-destructive">
-                No staff registered in this category
+                No hay personal registrado en esta categoría
               </div>
             )}
             <div className="flex justify-between">
-              <button onClick={() => setStep(1)} className="text-sm text-muted-foreground">← back</button>
+              <button onClick={() => setStep(1)} className="text-sm text-muted-foreground">← volver</button>
               <button disabled={!staffId} onClick={() => setStep(3)}
                 className="rounded-lg bg-primary px-6 py-2 font-bold uppercase tracking-widest text-primary-foreground disabled:opacity-50">
-                Next
+                Siguiente
               </button>
             </div>
           </div>
@@ -114,8 +114,8 @@ export function StaffConsumptionDialog({
 
         {step === 3 && (
           <div>
-            <div className="mb-2 text-sm">Staff: <b>{staff?.full_name}</b></div>
-            <label className="mb-1 block text-xs uppercase tracking-widest text-muted-foreground">Select product (FREE)</label>
+            <div className="mb-2 text-sm">Persona: <b>{staff?.full_name}</b></div>
+            <label className="mb-1 block text-xs uppercase tracking-widest text-muted-foreground">Seleccionar producto (GRATIS)</label>
             <div className="mb-3 grid max-h-64 grid-cols-2 gap-2 overflow-auto">
               {products?.map((p: any) => (
                 <button key={p.id} onClick={() => setProductId(p.id)}
@@ -132,9 +132,9 @@ export function StaffConsumptionDialog({
             </div>
             <button disabled={busy || !productId} onClick={confirm}
               className="w-full rounded-lg bg-primary py-4 font-bold uppercase tracking-widest text-primary-foreground disabled:opacity-50">
-              Confirm (FREE)
+              Confirmar (GRATIS)
             </button>
-            <button onClick={() => setStep(2)} className="mt-3 w-full text-center text-sm text-muted-foreground">← back</button>
+            <button onClick={() => setStep(2)} className="mt-3 w-full text-center text-sm text-muted-foreground">← volver</button>
           </div>
         )}
       </div>
