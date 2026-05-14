@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/lib/auth-context";
@@ -111,6 +111,8 @@ function PlatformPage() {
                     <td className="p-3 font-mono">{c.code}</td>
                     <td className="p-3">{c.active ? <span className="text-green-500">ACTIVO</span> : <span className="text-destructive">INACTIVO</span>}</td>
                     <td className="p-3 text-right">
+                      <Link to="/platform/company/$companyId" params={{ companyId: c.id }}
+                        className="mr-2 rounded border border-primary px-3 py-1 text-xs font-bold text-primary hover:bg-primary hover:text-primary-foreground">Gestionar</Link>
                       <button onClick={() => onReset(c.id, c.code)} className="mr-2 rounded border border-border px-3 py-1 text-xs hover:bg-accent">Reset Pass</button>
                       <button onClick={() => onToggle(c.id, c.active)} className="rounded border border-border px-3 py-1 text-xs hover:bg-accent">{c.active ? "Desactivar" : "Activar"}</button>
                     </td>

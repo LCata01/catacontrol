@@ -36,6 +36,7 @@ import { Route as AdminEventsRouteImport } from './routes/admin.events'
 import { Route as AdminEntriesRouteImport } from './routes/admin.entries'
 import { Route as AdminCashboxesRouteImport } from './routes/admin.cashboxes'
 import { Route as AdminBarsRouteImport } from './routes/admin.bars'
+import { Route as PlatformCompanyCompanyIdRouteImport } from './routes/platform.company.$companyId'
 
 const WorkstationRoute = WorkstationRouteImport.update({
   id: '/workstation',
@@ -172,6 +173,12 @@ const AdminBarsRoute = AdminBarsRouteImport.update({
   path: '/bars',
   getParentRoute: () => AdminRoute,
 } as any)
+const PlatformCompanyCompanyIdRoute =
+  PlatformCompanyCompanyIdRouteImport.update({
+    id: '/company/$companyId',
+    path: '/company/$companyId',
+    getParentRoute: () => PlatformRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -179,7 +186,7 @@ export interface FileRoutesByFullPath {
   '/bar': typeof BarRoute
   '/entry': typeof EntryRoute
   '/login': typeof LoginRoute
-  '/platform': typeof PlatformRoute
+  '/platform': typeof PlatformRouteWithChildren
   '/platform-login': typeof PlatformLoginRoute
   '/tenant-login': typeof TenantLoginRoute
   '/workstation': typeof WorkstationRouteWithChildren
@@ -201,13 +208,14 @@ export interface FileRoutesByFullPath {
   '/workstation/entry': typeof WorkstationEntryRoute
   '/admin/': typeof AdminIndexRoute
   '/workstation/': typeof WorkstationIndexRoute
+  '/platform/company/$companyId': typeof PlatformCompanyCompanyIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bar': typeof BarRoute
   '/entry': typeof EntryRoute
   '/login': typeof LoginRoute
-  '/platform': typeof PlatformRoute
+  '/platform': typeof PlatformRouteWithChildren
   '/platform-login': typeof PlatformLoginRoute
   '/tenant-login': typeof TenantLoginRoute
   '/admin/bars': typeof AdminBarsRoute
@@ -228,6 +236,7 @@ export interface FileRoutesByTo {
   '/workstation/entry': typeof WorkstationEntryRoute
   '/admin': typeof AdminIndexRoute
   '/workstation': typeof WorkstationIndexRoute
+  '/platform/company/$companyId': typeof PlatformCompanyCompanyIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -236,7 +245,7 @@ export interface FileRoutesById {
   '/bar': typeof BarRoute
   '/entry': typeof EntryRoute
   '/login': typeof LoginRoute
-  '/platform': typeof PlatformRoute
+  '/platform': typeof PlatformRouteWithChildren
   '/platform-login': typeof PlatformLoginRoute
   '/tenant-login': typeof TenantLoginRoute
   '/workstation': typeof WorkstationRouteWithChildren
@@ -258,6 +267,7 @@ export interface FileRoutesById {
   '/workstation/entry': typeof WorkstationEntryRoute
   '/admin/': typeof AdminIndexRoute
   '/workstation/': typeof WorkstationIndexRoute
+  '/platform/company/$companyId': typeof PlatformCompanyCompanyIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -289,6 +299,7 @@ export interface FileRouteTypes {
     | '/workstation/entry'
     | '/admin/'
     | '/workstation/'
+    | '/platform/company/$companyId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -316,6 +327,7 @@ export interface FileRouteTypes {
     | '/workstation/entry'
     | '/admin'
     | '/workstation'
+    | '/platform/company/$companyId'
   id:
     | '__root__'
     | '/'
@@ -345,6 +357,7 @@ export interface FileRouteTypes {
     | '/workstation/entry'
     | '/admin/'
     | '/workstation/'
+    | '/platform/company/$companyId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -353,7 +366,7 @@ export interface RootRouteChildren {
   BarRoute: typeof BarRoute
   EntryRoute: typeof EntryRoute
   LoginRoute: typeof LoginRoute
-  PlatformRoute: typeof PlatformRoute
+  PlatformRoute: typeof PlatformRouteWithChildren
   PlatformLoginRoute: typeof PlatformLoginRoute
   TenantLoginRoute: typeof TenantLoginRoute
   WorkstationRoute: typeof WorkstationRouteWithChildren
@@ -550,6 +563,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBarsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/platform/company/$companyId': {
+      id: '/platform/company/$companyId'
+      path: '/company/$companyId'
+      fullPath: '/platform/company/$companyId'
+      preLoaderRoute: typeof PlatformCompanyCompanyIdRouteImport
+      parentRoute: typeof PlatformRoute
+    }
   }
 }
 
@@ -591,6 +611,18 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface PlatformRouteChildren {
+  PlatformCompanyCompanyIdRoute: typeof PlatformCompanyCompanyIdRoute
+}
+
+const PlatformRouteChildren: PlatformRouteChildren = {
+  PlatformCompanyCompanyIdRoute: PlatformCompanyCompanyIdRoute,
+}
+
+const PlatformRouteWithChildren = PlatformRoute._addFileChildren(
+  PlatformRouteChildren,
+)
+
 interface WorkstationRouteChildren {
   WorkstationBarRoute: typeof WorkstationBarRoute
   WorkstationEntryRoute: typeof WorkstationEntryRoute
@@ -613,7 +645,7 @@ const rootRouteChildren: RootRouteChildren = {
   BarRoute: BarRoute,
   EntryRoute: EntryRoute,
   LoginRoute: LoginRoute,
-  PlatformRoute: PlatformRoute,
+  PlatformRoute: PlatformRouteWithChildren,
   PlatformLoginRoute: PlatformLoginRoute,
   TenantLoginRoute: TenantLoginRoute,
   WorkstationRoute: WorkstationRouteWithChildren,
