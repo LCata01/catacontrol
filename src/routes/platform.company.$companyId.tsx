@@ -26,7 +26,7 @@ function prettifyError(e: any): string {
       return parsed.map((p: any) => `${p.path?.join(".") ?? ""}: ${p.message}`).join(" · ");
     }
   } catch {}
-  if (/at least 6 character/i.test(msg)) return "La contraseña debe tener al menos 6 caracteres";
+  if (/at least 4 character/i.test(msg)) return "La contraseña debe tener al menos 4 caracteres";
   if (/Invalid.*regex|String must match/i.test(msg)) return "Usuario inválido (sólo letras, números, _ . -)";
   return msg;
 }
@@ -210,7 +210,7 @@ function NewUserForm({ onSubmit }: { onSubmit: (v: { username: string; displayNa
       <input placeholder="Nombre completo" value={displayName} onChange={e => setDisplayName(e.target.value)}
         maxLength={100} className="rounded-lg border border-border bg-input px-4 py-3" />
       <PasswordInput required placeholder="Contraseña" value={password} onChange={e => setPassword(e.target.value)}
-        minLength={6} className="rounded-lg border border-border bg-input px-4 py-3" />
+        minLength={4} className="rounded-lg border border-border bg-input px-4 py-3" />
       <select value={role} onChange={e => setRole(e.target.value as any)}
         className="rounded-lg border border-border bg-input px-4 py-3">
         <option value="superadmin">Superadmin</option>
@@ -283,7 +283,7 @@ function EditUserDialog({
             Nueva contraseña (vacío = no cambiar)
           </span>
           <PasswordInput value={password} onChange={e => setPassword(e.target.value)}
-            minLength={6} maxLength={72} autoComplete="new-password"
+            minLength={4} maxLength={72} autoComplete="new-password"
             className="w-full rounded border border-border bg-input px-3 py-2" />
         </label>
         <button type="submit" disabled={busy}
