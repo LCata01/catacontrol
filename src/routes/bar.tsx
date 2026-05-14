@@ -3,7 +3,7 @@ import { Guard } from "@/components/Guard";
 import { TopBar } from "@/components/TopBar";
 import { ShiftOpener } from "@/components/ShiftOpener";
 import { useAuth } from "@/lib/auth-context";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getActiveEvent, getOpenShift } from "@/lib/queries";
 import { useEffect, useMemo, useState } from "react";
@@ -22,7 +22,6 @@ type CartItem = { product_id: string; name: string; price: number; qty: number }
 function BarPos() {
   const { userId, lock, setLock, username } = useAuth();
   const navigate = useNavigate();
-  const qc = useQueryClient();
 
   const { data: event } = useQuery({ queryKey: ["active-event"], queryFn: getActiveEvent });
   const { data: shift, isLoading: shiftLoading, refetch: refetchShift } = useQuery({
@@ -57,11 +56,9 @@ function BarPos() {
     [products, filter]
   );
 
-  // ensure shift is matched to current bar; otherwise re-open dialog
   useEffect(() => {
     if (shift && lock && shift.bar_id !== lock.id) {
-      // Different bar than current lock → close that shift in mind by forcing user to choose again
-      toast.error("Open shift is for a different bar. Please close it first.");
+      toast.error("El turno abierto pertenece a otra barra. Ciérrelo primero.");
     }
   }, [shift, lock]);
 
@@ -76,7 +73,7 @@ function BarPos() {
     if (error) { toast.error(error.message); return; }
     setLock({ ...lock, shiftId: data.id });
     refetchShift();
-    toast.success("Shift opened");
+    toast.success("Turno abierto");
   };
 
   const add = (p: any) => {
@@ -103,11 +100,12 @@ function BarPos() {
     const items = cart.map((i) => ({
       sale_id: sale.id, item_kind: "product", product_id: i.product_id,
       name: i.name, unit_price: i.price, quantity: i.qty, subtotal: i.price * i.qty,
+      people_count: 0,
     }));
     const { error: e2 } = await supabase.from("sale_items").insert(items);
     setBusy(false);
     if (e2) { toast.error(e2.message); return; }
-    toast.success(`Sale #${sale.sale_number} · ${money(total)}`);
+    toast.success(`Venta #${sale.sale_number} · ${money(total)}`);
     printBarTicket({
       branding: branding ?? {},
       number: sale.sale_number,
@@ -120,38 +118,39 @@ function BarPos() {
     setCart([]);
   };
 
-  if (shiftLoading) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Loading…</div>;
+  if (shiftLoading) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Cargando…</div>;
 
   if (!shift) {
     return (
       <div className="min-h-screen">
-        <TopBar title={`BAR · ${lock?.name}`} right={
+        <TopBar title={`BARRA · ${lock?.name}`} right={
           <button onClick={() => { setLock(null); navigate({ to: "/workstation" }); }}
-            className="rounded-md border border-border px-3 py-2 text-sm hover:bg-accent">Change</button>
+            className="rounded-md border border-border px-3 py-2 text-sm hover:bg-accent">Cambiar</button>
         } />
-        <ShiftOpener title={`Open shift — ${lock?.name}`} onOpen={openShift} busy={busy} />
+        <ShiftOpener title={`Abrir turno — ${lock?.name}`} onOpen={openShift} busy={busy} />
       </div>
     );
   }
 
+  const payLabels: Record<string, string> = { cash: "EFECTIVO", qr: "QR", card: "TARJETA" };
+
   return (
     <div className="flex min-h-screen flex-col">
-      <TopBar title={`BAR · ${lock?.name}`}
+      <TopBar title={`BARRA · ${lock?.name}`}
         right={
           <div className="flex gap-2">
             <button onClick={() => setOpenStaff(true)}
               className="rounded-md border border-warning bg-card px-3 py-2 text-xs font-bold uppercase tracking-widest text-warning hover:bg-warning hover:text-warning-foreground">Staff</button>
             <button onClick={() => setOpenClose(true)}
-              className="rounded-md border border-destructive bg-card px-3 py-2 text-xs font-bold uppercase tracking-widest text-destructive hover:bg-destructive hover:text-destructive-foreground">Close shift</button>
+              className="rounded-md border border-destructive bg-card px-3 py-2 text-xs font-bold uppercase tracking-widest text-destructive hover:bg-destructive hover:text-destructive-foreground">Cerrar Turno</button>
           </div>
         } />
 
       <div className="grid flex-1 gap-4 p-4 lg:grid-cols-[1fr_420px]">
-        {/* Products */}
         <div className="flex flex-col rounded-2xl border border-border bg-card p-4">
           <input
             value={filter} onChange={(e) => setFilter(e.target.value)}
-            placeholder="Search product…"
+            placeholder="Buscar producto…"
             className="mb-4 w-full rounded-lg border border-border bg-input px-4 py-3 outline-none focus:ring-2 ring-ring"
           />
           <div className="grid flex-1 grid-cols-2 gap-3 overflow-auto sm:grid-cols-3 md:grid-cols-4">
@@ -166,10 +165,9 @@ function BarPos() {
           </div>
         </div>
 
-        {/* Cart */}
         <div className="flex flex-col rounded-2xl border border-border bg-card">
           <div className="flex-1 overflow-auto p-4">
-            {cart.length === 0 && <p className="text-center text-sm text-muted-foreground">Tap products to add</p>}
+            {cart.length === 0 && <p className="text-center text-sm text-muted-foreground">Toque productos para agregar</p>}
             {cart.map((i) => (
               <div key={i.product_id} className="mb-2 flex items-center gap-2 rounded-lg border border-border p-2">
                 <div className="flex-1">
@@ -189,7 +187,7 @@ function BarPos() {
               {(["cash", "qr", "card"] as const).map((m) => (
                 <button key={m} onClick={() => setPay(m)}
                   className={`flex-1 rounded-lg border px-3 py-3 text-sm font-bold uppercase tracking-widest ${pay === m ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background"}`}>
-                  {m}
+                  {payLabels[m]}
                 </button>
               ))}
             </div>
@@ -199,7 +197,7 @@ function BarPos() {
             </div>
             <button disabled={busy || cart.length === 0} onClick={charge}
               className="w-full rounded-lg bg-success py-5 text-lg font-bold uppercase tracking-widest text-success-foreground disabled:opacity-50">
-              Charge
+              Cobrar
             </button>
           </div>
         </div>
