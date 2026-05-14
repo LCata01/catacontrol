@@ -102,6 +102,114 @@ function buildEscPos(opts: BarTicketOpts): string {
   return out;
 }
 
+// ----------------- Staff drink ticket -----------------
+
+export type StaffTicketOpts = {
+  branding: TicketBranding;
+  event?: string;
+  staffName: string;
+  staffCategory?: string;
+  items: { name: string; qty: number }[];
+};
+
+function buildStaffEscPos(opts: StaffTicketOpts): string {
+  const name = (opts.branding.nightclub_name || "CATA CLUB").toUpperCase();
+  const now = new Date();
+  const date = now.toLocaleDateString("es-AR");
+  const time = now.toLocaleTimeString("es-AR", { hour12: false });
+
+  let out = "";
+  out += INIT;
+  out += ALIGN_C + SIZE_DBL + BOLD_ON + name + "\n" + BOLD_OFF + SIZE_NORMAL;
+  out += hr("=");
+  out += ALIGN_C + SIZE_DBL + BOLD_ON + "STAFF DRINK\n" + BOLD_OFF + SIZE_NORMAL;
+  out += hr();
+
+  out += ALIGN_L;
+  if (opts.event) out += pad("EVENTO", 10) + padL(opts.event, COLS - 10) + "\n";
+  out += pad("FECHA", 10) + padL(date, COLS - 10) + "\n";
+  out += pad("HORA", 10) + padL(time, COLS - 10) + "\n";
+  out += pad("PARA", 10) + padL(opts.staffName, COLS - 10) + "\n";
+  if (opts.staffCategory) out += pad("ROL", 10) + padL(opts.staffCategory.toUpperCase(), COLS - 10) + "\n";
+  out += hr();
+
+  out += ALIGN_C;
+  for (const it of opts.items) {
+    out += SIZE_DBL + BOLD_ON + (it.name.toUpperCase()) + "\n" + BOLD_OFF + SIZE_NORMAL;
+    out += SIZE_DBL_W + "x" + it.qty + "\n" + SIZE_NORMAL;
+    out += "\n";
+  }
+  out += ALIGN_L;
+  out += hr();
+  out += ALIGN_C + "CORTESIA STAFF\n";
+  out += ALIGN_L;
+  out += FEED(2);
+  out += CUT;
+  return out;
+}
+
+export async function printStaffTicket(opts: StaffTicketOpts) {
+  if (typeof window === "undefined") return;
+  if (getSavedPrinter()) {
+    try {
+      await connectQz();
+      const data = buildStaffEscPos(opts);
+      await printRaw([{ type: "raw", format: "plain", data }]);
+      return;
+    } catch (err) {
+      console.error("QZ print failed, falling back to browser print", err);
+    }
+  }
+  printStaffTicketHtml(opts);
+}
+
+function printStaffTicketHtml(opts: StaffTicketOpts) {
+  const w = window.open("", "PRINT", "width=360,height=720");
+  if (!w) return;
+  const now = new Date();
+  const date = now.toLocaleDateString("es-AR");
+  const time = now.toLocaleTimeString("es-AR", { hour12: false });
+  const name = (opts.branding.nightclub_name || "CATA CLUB").toUpperCase();
+  const logo = opts.branding.logo_url
+    ? `<div class="logo"><img src="${opts.branding.logo_url}" alt=""/></div>` : "";
+  const html = `<!doctype html><html><head><meta charset="utf-8"/><title>Staff Drink</title>
+<style>
+  @page { size: 80mm auto; margin: 0; }
+  html, body { width: 80mm; margin: 0; padding: 0; }
+  body { font: 12px/1.35 'Courier New', ui-monospace, monospace; color: #000; padding: 4mm 3mm; text-align: center; }
+  .logo img { max-width: 50mm; max-height: 18mm; margin: 0 auto 2mm; display: block; }
+  .name { font-size: 18px; font-weight: 900; letter-spacing: 2px; }
+  .badge { font-size: 22px; font-weight: 900; margin: 3mm 0; letter-spacing: 2px; }
+  .meta { font-size: 11px; margin-top: 2mm; text-align: left; }
+  .meta div { display: flex; justify-content: space-between; }
+  hr { border: 0; border-top: 1px dashed #000; margin: 3mm 0; }
+  .item { margin: 3mm 0; }
+  .item .n { font-size: 22px; font-weight: 900; text-transform: uppercase; }
+  .item .q { font-size: 28px; font-weight: 900; }
+  .footer { margin-top: 4mm; font-size: 11px; font-weight: 700; }
+</style></head><body>
+  ${logo}
+  <div class="name">${name}</div>
+  <hr/>
+  <div class="badge">STAFF DRINK</div>
+  <hr/>
+  <div class="meta">
+    ${opts.event ? `<div><span>EVENTO</span><span>${esc(opts.event)}</span></div>` : ""}
+    <div><span>FECHA</span><span>${date}</span></div>
+    <div><span>HORA</span><span>${time}</span></div>
+    <div><span>PARA</span><span>${esc(opts.staffName)}</span></div>
+    ${opts.staffCategory ? `<div><span>ROL</span><span>${esc(opts.staffCategory.toUpperCase())}</span></div>` : ""}
+  </div>
+  <hr/>
+  ${opts.items.map(i => `<div class="item"><div class="n">${esc(i.name)}</div><div class="q">x${i.qty}</div></div>`).join("")}
+  <hr/>
+  <div class="footer">CORTESIA STAFF</div>
+  <script>window.onload=()=>{window.print();setTimeout(()=>window.close(),300)}</script>
+</body></html>`;
+  w.document.write(html);
+  w.document.close();
+}
+
 // ----------------- Public API -----------------
 
 export async function printBarTicket(opts: BarTicketOpts) {
