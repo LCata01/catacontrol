@@ -161,7 +161,7 @@ export const updateCompanyUser = createServerFn({ method: "POST" })
       throw new Error("Usuario no pertenece a este boliche");
     }
 
-    const profileUpdates: Record<string, any> = {};
+    const profileUpdates: { username?: string; display_name?: string | null; active?: boolean } = {};
     if (data.username) profileUpdates.username = data.username.toLowerCase();
     if (data.displayName !== undefined) profileUpdates.display_name = data.displayName;
     if (data.active !== undefined) profileUpdates.active = data.active;
