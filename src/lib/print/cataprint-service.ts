@@ -47,7 +47,7 @@ function wsConnect(): Promise<WebSocket> {
   if (typeof window === "undefined") return Promise.reject(new Error("CATAPRINT requiere navegador"));
   if (ws?.readyState === WebSocket.OPEN) return Promise.resolve(ws);
   if (wsReady) return wsReady;
-  wsReady = new Promise((resolve, reject) => {
+  const connecting = new Promise<WebSocket>((resolve, reject) => {
     const socket = new WebSocket(getWsBase());
     const timeout = window.setTimeout(() => {
       socket.close();
@@ -67,6 +67,7 @@ function wsConnect(): Promise<WebSocket> {
       else pending.reject(new Error(msg.error || "Error CATAPRINT"));
     };
   }).finally(() => { wsReady = null; });
+  wsReady = connecting;
   return wsReady;
 }
 
