@@ -65,12 +65,12 @@ function SettingsPage() {
 
   const save = async () => {
     setBusy(true);
-    const { error } = await supabase.from("app_settings").update({
+    const { error } = await supabase.from("app_settings").upsert({
       nightclub_name: name.trim() || "CATA CLUB",
       slogan: slogan.trim(),
       logo_url: logo.trim() || null,
       updated_at: new Date().toISOString(),
-    }).eq("id", true);
+    }, { onConflict: "company_id" });
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Configuración guardada");
