@@ -9,6 +9,30 @@ import type {
   PrinterInfo,
   TicketPrintInput,
 } from "./types";
+import { getQzCertificate, signQzRequest } from "./qz-signing.functions";
+
+let signingConfigured = false;
+function configureSigning() {
+  if (signingConfigured) return;
+  signingConfigured = true;
+
+  // SHA512 to match server signer.
+  qz.security.setSignatureAlgorithm("SHA512");
+
+  qz.security.setCertificatePromise((resolve: any, reject: any) => {
+    getQzCertificate({})
+      .then((r: { certificate: string }) => resolve(r.certificate))
+      .catch(reject);
+  });
+
+  qz.security.setSignaturePromise((toSign: string) => {
+    return (resolve: any, reject: any) => {
+      signQzRequest({ data: { request: toSign } })
+        .then((r: { signature: string }) => resolve(r.signature))
+        .catch(reject);
+    };
+  });
+}
 
 // ESC/POS cut commands (appended after HTML jobs)
 const ESC_FULL_CUT = "\x1D\x56\x00";
@@ -44,6 +68,7 @@ function detectCutter(name: string): "full" | "partial" | "none" {
 }
 
 async function ensureConnected() {
+  configureSigning();
   if (qz.websocket.isActive()) return;
   if (connectPromise) return connectPromise;
   connectPromise = (async () => {
@@ -61,6 +86,7 @@ export const qzPrintService: PrintService = {
 
   async isAvailable() {
     if (typeof window === "undefined") return false;
+    configureSigning();
     try {
       await qz.websocket.connect({ retries: 0, delay: 0 });
       return true;
