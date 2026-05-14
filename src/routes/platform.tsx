@@ -57,13 +57,6 @@ function PlatformPage() {
     catch (e: any) { toast.error(e.message); }
   };
 
-  const onReset = async (id: string, codeName: string) => {
-    const np = prompt(`Nueva contraseña para ${codeName}:`);
-    if (!np || np.length < 6) { toast.error("Mínimo 6 caracteres"); return; }
-    try { await reset({ data: { id, password: np } }); toast.success("Contraseña actualizada"); }
-    catch (e: any) { toast.error(e.message); }
-  };
-
   if (loading || !session || role !== "platform_admin") {
     return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Cargando…</div>;
   }
