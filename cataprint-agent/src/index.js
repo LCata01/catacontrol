@@ -22,7 +22,33 @@ const PORT = parseInt(process.env.CATAPRINT_PORT || "9100", 10);
 const VERSION = require("../package.json").version;
 
 const app = express();
-app.use(cors({ origin: true }));
+
+// CORS — allow any origin (the agent only listens on 127.0.0.1, so the
+// attack surface is local). We must also opt-in to Chrome's Private Network
+// Access (PNA): a public-origin HTTPS page (e.g. https://catacontrol.lovable.app)
+// calling http://127.0.0.1 is blocked unless the preflight responds with
+// Access-Control-Allow-Private-Network: true.
+app.use((req, res, next) => {
+  const origin = req.headers.origin || "*";
+  res.setHeader("Access-Control-Allow-Origin", origin);
+  res.setHeader("Vary", "Origin");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    req.headers["access-control-request-headers"] || "Content-Type, Authorization",
+  );
+  // Chrome PNA — required when a public site calls a private-network address.
+  if (req.headers["access-control-request-private-network"]) {
+    res.setHeader("Access-Control-Allow-Private-Network", "true");
+  }
+  if (req.method === "OPTIONS") {
+    res.setHeader("Access-Control-Max-Age", "86400");
+    return res.status(204).end();
+  }
+  next();
+});
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "5mb" }));
 
 app.get("/health", (_req, res) => {
