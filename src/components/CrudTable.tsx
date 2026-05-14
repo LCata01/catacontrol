@@ -138,3 +138,52 @@ function Editor({ row, fields, title, onCancel, onSave }: {
     </div>
   );
 }
+
+function DynamicSelect({ field, value, onChange }: {
+  field: Field; value: string; onChange: (v: string) => void;
+}) {
+  const qc = useQueryClient();
+  const from = field.optionsFrom;
+  const { data: dyn } = useQuery({
+    queryKey: ["dyn-options", from?.table],
+    enabled: !!from,
+    queryFn: async () => {
+      let q: any = supabase.from(from!.table as any).select("*").order(from!.labelColumn ?? "name");
+      if (from!.activeOnly !== false) q = q.eq("active", true);
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data ?? []).map((r: any) => ({
+        value: String(r[from!.valueColumn ?? "name"]),
+        label: String(r[from!.labelColumn ?? "name"]),
+      }));
+    },
+  });
+
+  const opts = from ? (dyn ?? []) : (field.options ?? []);
+
+  const createNew = async () => {
+    if (!from) return;
+    const name = window.prompt(`Nueva opción para ${field.label}:`)?.trim();
+    if (!name) return;
+    const { error } = await supabase.from(from.table as any).insert({ name, active: true } as any);
+    if (error) { toast.error(error.message); return; }
+    await qc.invalidateQueries({ queryKey: ["dyn-options", from.table] });
+    await qc.invalidateQueries({ queryKey: ["crud", from.table] });
+    onChange(name);
+    toast.success("Opción creada");
+  };
+
+  return (
+    <div className="flex gap-2">
+      <select value={value} onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-lg border border-border bg-input px-3 py-2.5">
+        <option value="">—</option>
+        {opts.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+      </select>
+      {from && (
+        <button type="button" onClick={createNew}
+          className="rounded-lg border border-border bg-card px-3 py-2.5 text-sm font-bold uppercase tracking-widest hover:bg-accent">+</button>
+      )}
+    </div>
+  );
+}
