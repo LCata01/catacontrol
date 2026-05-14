@@ -8,6 +8,8 @@ export type Field = {
   label: string;
   type?: "text" | "number" | "select" | "checkbox" | "date" | "time";
   options?: { value: string; label: string }[];
+  /** Load select options dynamically from a Supabase table. */
+  optionsFrom?: { table: string; valueColumn?: string; labelColumn?: string; activeOnly?: boolean };
   required?: boolean;
 };
 
