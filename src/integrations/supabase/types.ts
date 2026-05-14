@@ -94,6 +94,7 @@ export type Database = {
           guest_name: string
           id: string
           notes: string | null
+          people_count: number
           quantity: number
           shift_id: string
           ticket_category: string
@@ -107,6 +108,7 @@ export type Database = {
           guest_name: string
           id?: string
           notes?: string | null
+          people_count?: number
           quantity?: number
           shift_id: string
           ticket_category: string
@@ -120,6 +122,7 @@ export type Database = {
           guest_name?: string
           id?: string
           notes?: string | null
+          people_count?: number
           quantity?: number
           shift_id?: string
           ticket_category?: string
@@ -267,6 +270,7 @@ export type Database = {
           id: string
           item_kind: string
           name: string
+          people_count: number
           product_id: string | null
           quantity: number
           sale_id: string
@@ -279,6 +283,7 @@ export type Database = {
           id?: string
           item_kind: string
           name: string
+          people_count?: number
           product_id?: string | null
           quantity?: number
           sale_id: string
@@ -291,6 +296,7 @@ export type Database = {
           id?: string
           item_kind?: string
           name?: string
+          people_count?: number
           product_id?: string | null
           quantity?: number
           sale_id?: string
@@ -585,6 +591,7 @@ export type Database = {
           id: string
           is_complimentary: boolean
           name: string
+          people_per_ticket: number
           price: number
         }
         Insert: {
@@ -592,6 +599,7 @@ export type Database = {
           id?: string
           is_complimentary?: boolean
           name: string
+          people_per_ticket?: number
           price?: number
         }
         Update: {
@@ -599,6 +607,7 @@ export type Database = {
           id?: string
           is_complimentary?: boolean
           name?: string
+          people_per_ticket?: number
           price?: number
         }
         Relationships: []
