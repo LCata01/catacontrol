@@ -84,7 +84,7 @@ export const createCompany = createServerFn({ method: "POST" })
           .min(2)
           .max(32)
           .regex(/^[A-Z0-9_-]+$/, "Solo mayúsculas, números, _ y -"),
-        password: z.string().min(6).max(200),
+        password: z.string().min(4).max(200),
       })
       .parse(input),
   )
@@ -129,7 +129,7 @@ export const toggleCompanyActive = createServerFn({ method: "POST" })
 export const resetCompanyPassword = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
-    z.object({ id: z.string().uuid(), password: z.string().min(6).max(200) }).parse(input),
+    z.object({ id: z.string().uuid(), password: z.string().min(4).max(200) }).parse(input),
   )
   .handler(async ({ data, context }) => {
     const { data: roles } = await context.supabase
