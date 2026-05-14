@@ -4,6 +4,7 @@
 
 import { qzPrintService } from "./qz-service";
 import { cataprintService } from "./cataprint-service";
+import { browserPrintService } from "./browser-service";
 import type { PrintService, TicketPrintInput } from "./types";
 import { getActivePrinter } from "./storage";
 
@@ -12,12 +13,12 @@ export { getLastPrinter, setLastPrinter, getActivePrinter, setActivePrinter, get
 
 const DRIVER_KEY = "cata_print_driver";
 
-type DriverId = "cataprint" | "qz" | "auto";
+type DriverId = "cataprint" | "qz" | "browser" | "auto";
 
 function readDriverPref(): DriverId {
   if (typeof window === "undefined") return "auto";
   const v = localStorage.getItem(DRIVER_KEY);
-  if (v === "cataprint" || v === "qz" || v === "auto") return v;
+  if (v === "cataprint" || v === "qz" || v === "browser" || v === "auto") return v;
   return "auto";
 }
 
