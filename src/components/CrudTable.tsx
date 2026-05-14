@@ -178,7 +178,7 @@ function DynamicSelect({ field, value, onChange }: {
       <select value={value} onChange={(e) => onChange(e.target.value)}
         className="w-full rounded-lg border border-border bg-input px-3 py-2.5">
         <option value="">—</option>
-        {opts.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+        {opts.map((o: { value: string; label: string }) => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
       {from && (
         <button type="button" onClick={createNew}
