@@ -7,16 +7,20 @@ export const Route = createFileRoute("/admin")({
 });
 
 const tabs = [
+  // Operación
   { to: "/admin", label: "En Vivo" },
+  { to: "/admin/reports", label: "Reportes" },
+  // Catálogo de venta
+  { to: "/admin/tickets", label: "Tickets" },
+  { to: "/admin/wristbands", label: "Pulseras" },
+  { to: "/admin/products", label: "Productos" },
+  // Puestos físicos
+  { to: "/admin/bars", label: "Barras" },
+  { to: "/admin/entries", label: "Entradas" },
+  // Configuración
   { to: "/admin/events", label: "Eventos" },
   { to: "/admin/users", label: "Usuarios" },
   { to: "/admin/staff", label: "Staff" },
-  { to: "/admin/products", label: "Productos" },
-  { to: "/admin/tickets", label: "Tickets" },
-  { to: "/admin/wristbands", label: "Pulseras" },
-  { to: "/admin/bars", label: "Barras" },
-  { to: "/admin/entries", label: "Entradas" },
-  { to: "/admin/reports", label: "Reportes" },
   { to: "/admin/settings", label: "Ticket" },
 ];
 
