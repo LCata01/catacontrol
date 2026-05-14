@@ -10,6 +10,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { money } from "@/lib/format";
 import { printBarTicket } from "@/lib/printer";
+import { PrinterSettingsButton } from "@/components/PrinterSettings";
 import { StaffConsumptionDialog } from "@/components/StaffConsumptionDialog";
 import { CloseShiftDialog } from "@/components/CloseShiftDialog";
 
@@ -139,6 +140,7 @@ function BarPos() {
       <TopBar title={`BARRA · ${lock?.name}`}
         right={
           <div className="flex gap-2">
+            <PrinterSettingsButton />
             <button onClick={() => setOpenStaff(true)}
               className="rounded-md border border-warning bg-card px-3 py-2 text-xs font-bold uppercase tracking-widest text-warning hover:bg-warning hover:text-warning-foreground">Staff</button>
             <button onClick={() => setOpenClose(true)}
