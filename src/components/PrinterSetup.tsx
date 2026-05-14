@@ -67,7 +67,7 @@ export function PrinterSetup({
     }
   };
 
-  const onChangeDriver = (d: "auto" | "cataprint" | "qz") => {
+  const onChangeDriver = (d: "auto" | "cataprint" | "qz" | "browser") => {
     setDriver(d);
     setPrintDriver(d);
     setTestedFor(null);
