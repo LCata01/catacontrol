@@ -9,7 +9,7 @@ import { getActiveEvent, getOpenShift } from "@/lib/queries";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { money } from "@/lib/format";
-import { printTicket } from "@/lib/printer";
+import { printBarTicket } from "@/lib/printer";
 import { StaffConsumptionDialog } from "@/components/StaffConsumptionDialog";
 import { CloseShiftDialog } from "@/components/CloseShiftDialog";
 
