@@ -22,6 +22,7 @@ import { Route as WorkstationBarRouteImport } from './routes/workstation.bar'
 import { Route as AdminWristbandsRouteImport } from './routes/admin.wristbands'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminTicketsRouteImport } from './routes/admin.tickets'
+import { Route as AdminStaffCategoriesRouteImport } from './routes/admin.staff-categories'
 import { Route as AdminStaffRouteImport } from './routes/admin.staff'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
@@ -98,6 +99,11 @@ const AdminTicketsRoute = AdminTicketsRouteImport.update({
   path: '/tickets',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminStaffCategoriesRoute = AdminStaffCategoriesRouteImport.update({
+  id: '/staff-categories',
+  path: '/staff-categories',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminStaffRoute = AdminStaffRouteImport.update({
   id: '/staff',
   path: '/staff',
@@ -166,6 +172,7 @@ export interface FileRoutesByFullPath {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
+  '/admin/staff-categories': typeof AdminStaffCategoriesRoute
   '/admin/tickets': typeof AdminTicketsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/wristbands': typeof AdminWristbandsRoute
@@ -189,6 +196,7 @@ export interface FileRoutesByTo {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
+  '/admin/staff-categories': typeof AdminStaffCategoriesRoute
   '/admin/tickets': typeof AdminTicketsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/wristbands': typeof AdminWristbandsRoute
@@ -215,6 +223,7 @@ export interface FileRoutesById {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
+  '/admin/staff-categories': typeof AdminStaffCategoriesRoute
   '/admin/tickets': typeof AdminTicketsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/wristbands': typeof AdminWristbandsRoute
@@ -242,6 +251,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/staff'
+    | '/admin/staff-categories'
     | '/admin/tickets'
     | '/admin/users'
     | '/admin/wristbands'
@@ -265,6 +275,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/staff'
+    | '/admin/staff-categories'
     | '/admin/tickets'
     | '/admin/users'
     | '/admin/wristbands'
@@ -290,6 +301,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/staff'
+    | '/admin/staff-categories'
     | '/admin/tickets'
     | '/admin/users'
     | '/admin/wristbands'
@@ -401,6 +413,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTicketsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/staff-categories': {
+      id: '/admin/staff-categories'
+      path: '/staff-categories'
+      fullPath: '/admin/staff-categories'
+      preLoaderRoute: typeof AdminStaffCategoriesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/staff': {
       id: '/admin/staff'
       path: '/staff'
@@ -485,6 +504,7 @@ interface AdminRouteChildren {
   AdminReportsRoute: typeof AdminReportsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminStaffRoute: typeof AdminStaffRoute
+  AdminStaffCategoriesRoute: typeof AdminStaffCategoriesRoute
   AdminTicketsRoute: typeof AdminTicketsRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminWristbandsRoute: typeof AdminWristbandsRoute
@@ -502,6 +522,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminReportsRoute: AdminReportsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminStaffRoute: AdminStaffRoute,
+  AdminStaffCategoriesRoute: AdminStaffCategoriesRoute,
   AdminTicketsRoute: AdminTicketsRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminWristbandsRoute: AdminWristbandsRoute,
@@ -537,3 +558,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
