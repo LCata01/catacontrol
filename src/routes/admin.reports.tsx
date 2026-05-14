@@ -9,15 +9,15 @@ export const Route = createFileRoute("/admin/reports")({ component: Reports });
 function Reports() {
   const [tab, setTab] = useState<"sales" | "consumptions" | "comps" | "shifts">("sales");
   const tabs = [
-    { id: "sales", label: "Sales" },
-    { id: "consumptions", label: "Staff consumptions" },
-    { id: "comps", label: "Complimentary" },
-    { id: "shifts", label: "Closings" },
+    { id: "sales", label: "Ventas" },
+    { id: "consumptions", label: "Consumos staff" },
+    { id: "comps", label: "Cortesías" },
+    { id: "shifts", label: "Cierres de turno" },
   ] as const;
 
   return (
     <div>
-      <h2 className="mb-4 text-2xl font-black uppercase">Reports</h2>
+      <h2 className="mb-4 text-2xl font-black uppercase">Reportes</h2>
       <div className="mb-4 flex gap-2">
         {tabs.map((t) => (
           <button key={t.id} onClick={() => setTab(t.id)}
