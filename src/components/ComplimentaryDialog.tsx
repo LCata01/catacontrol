@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
-import { printTicket } from "@/lib/printer";
 
 export function ComplimentaryDialog({
   shiftId, entryId, eventId, onClose,
@@ -38,12 +37,6 @@ export function ComplimentaryDialog({
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Complimentary ticket saved");
-    printTicket({
-      title: "ENTRADA CORTESÍA",
-      subtitle: tt.name,
-      lines: [{ left: `${qty}x ${tt.name}`, right: "FREE" }],
-      guest, notes: notes || undefined,
-    });
     onClose();
   };
 
@@ -83,7 +76,7 @@ export function ComplimentaryDialog({
 
         <button disabled={busy || !ticketTypeId || !guest.trim()} onClick={save}
           className="mt-6 w-full rounded-lg bg-primary py-4 font-bold uppercase tracking-widest text-primary-foreground disabled:opacity-50">
-          Save & print
+          Save
         </button>
       </div>
     </div>

@@ -1,9 +1,19 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { printTicket } from "@/lib/printer";
+
+const CATEGORIES: { value: string; label: string }[] = [
+  { value: "dj", label: "DJ" },
+  { value: "technical", label: "TECHNICAL" },
+  { value: "security", label: "SECURITY" },
+  { value: "photography", label: "PHOTOGRAPHY" },
+  { value: "rrpp", label: "RRPP" },
+  { value: "owner", label: "OWNER" },
+  { value: "management", label: "MANAGEMENT" },
+  { value: "guest", label: "GUEST" },
+];
 
 export function StaffConsumptionDialog({
   shiftId, barId, eventId, onClose,
@@ -12,22 +22,22 @@ export function StaffConsumptionDialog({
 }) {
   const { userId } = useAuth();
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [search, setSearch] = useState("");
-  const [staff, setStaff] = useState<any | null>(null);
+  const [category, setCategory] = useState<string | null>(null);
+  const [staffId, setStaffId] = useState<string>("");
   const [productId, setProductId] = useState<string | null>(null);
   const [qty, setQty] = useState(1);
   const [busy, setBusy] = useState(false);
 
-  const { data: matches } = useQuery({
-    queryKey: ["staff-search", search],
-    enabled: step === 1 && search.length >= 2,
+  const { data: staffList } = useQuery({
+    queryKey: ["staff-by-cat", category],
+    enabled: !!category,
     queryFn: async () => {
       const { data, error } = await supabase.from("staff_members")
-        .select("*").eq("active", true)
-        .ilike("full_name", `%${search}%`).limit(10);
+        .select("*").eq("active", true).eq("category", category as any).order("full_name");
       if (error) throw error; return data!;
     },
   });
+
   const { data: products } = useQuery({
     queryKey: ["products-active-staff"],
     queryFn: async () => {
@@ -36,6 +46,7 @@ export function StaffConsumptionDialog({
     },
   });
 
+  const staff = useMemo(() => staffList?.find((s: any) => s.id === staffId), [staffList, staffId]);
   const product = products?.find((p: any) => p.id === productId);
 
   const confirm = async () => {
@@ -49,11 +60,6 @@ export function StaffConsumptionDialog({
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Staff consumption logged");
-    printTicket({
-      title: "CONSUMO STAFF",
-      subtitle: `${staff.full_name} · ${String(staff.category).toUpperCase()}`,
-      lines: [{ left: `${qty}x ${product.name}`, right: "—" }],
-    });
     onClose();
   };
 
@@ -67,20 +73,13 @@ export function StaffConsumptionDialog({
 
         {step === 1 && (
           <div>
-            <input autoFocus value={search} onChange={(e) => setSearch(e.target.value)}
-              placeholder="Type staff name…"
-              className="w-full rounded-lg border border-border bg-input px-4 py-3 outline-none focus:ring-2 ring-ring" />
-            <div className="mt-3 max-h-72 space-y-2 overflow-auto">
-              {search.length >= 2 && matches?.length === 0 && (
-                <div className="rounded-lg border border-destructive p-4 text-center text-destructive">
-                  STAFF MEMBER NOT FOUND
-                </div>
-              )}
-              {matches?.map((m: any) => (
-                <button key={m.id} onClick={() => { setStaff(m); setStep(2); }}
-                  className="block w-full rounded-lg border border-border bg-background p-3 text-left hover:border-primary">
-                  <div className="font-bold">{m.full_name}</div>
-                  <div className="text-xs uppercase text-muted-foreground">{m.category}</div>
+            <p className="mb-3 text-sm text-muted-foreground">SELECT STAFF CATEGORY</p>
+            <div className="grid grid-cols-2 gap-2">
+              {CATEGORIES.map((c) => (
+                <button key={c.value}
+                  onClick={() => { setCategory(c.value); setStaffId(""); setStep(2); }}
+                  className="rounded-lg border border-border bg-background p-4 text-center font-bold uppercase tracking-widest hover:border-primary">
+                  {c.label}
                 </button>
               ))}
             </div>
@@ -89,32 +88,51 @@ export function StaffConsumptionDialog({
 
         {step === 2 && (
           <div>
-            <div className="mb-2 text-sm">For: <b>{staff?.full_name}</b> ({staff?.category})</div>
-            <div className="grid max-h-80 grid-cols-2 gap-2 overflow-auto">
+            <p className="mb-3 text-sm">Category: <b>{CATEGORIES.find(c => c.value === category)?.label}</b></p>
+            <label className="mb-1 block text-xs uppercase tracking-widest text-muted-foreground">Select staff member</label>
+            <select value={staffId} onChange={(e) => setStaffId(e.target.value)}
+              className="mb-4 w-full rounded-lg border border-border bg-input px-4 py-3 outline-none focus:ring-2 ring-ring">
+              <option value="">— choose —</option>
+              {staffList?.map((s: any) => (
+                <option key={s.id} value={s.id}>{s.full_name}</option>
+              ))}
+            </select>
+            {staffList && staffList.length === 0 && (
+              <div className="rounded-lg border border-destructive p-3 text-center text-destructive">
+                No staff registered in this category
+              </div>
+            )}
+            <div className="flex justify-between">
+              <button onClick={() => setStep(1)} className="text-sm text-muted-foreground">← back</button>
+              <button disabled={!staffId} onClick={() => setStep(3)}
+                className="rounded-lg bg-primary px-6 py-2 font-bold uppercase tracking-widest text-primary-foreground disabled:opacity-50">
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div>
+            <div className="mb-2 text-sm">Staff: <b>{staff?.full_name}</b></div>
+            <label className="mb-1 block text-xs uppercase tracking-widest text-muted-foreground">Select product (FREE)</label>
+            <div className="mb-3 grid max-h-64 grid-cols-2 gap-2 overflow-auto">
               {products?.map((p: any) => (
-                <button key={p.id} onClick={() => { setProductId(p.id); setStep(3); }}
+                <button key={p.id} onClick={() => setProductId(p.id)}
                   className={`rounded-lg border p-3 text-left ${productId === p.id ? "border-primary" : "border-border"} hover:border-primary`}>
                   <div className="text-xs uppercase text-muted-foreground">{p.category}</div>
                   <div className="font-bold">{p.name}</div>
                 </button>
               ))}
             </div>
-            <button onClick={() => setStep(1)} className="mt-3 text-sm text-muted-foreground">← back</button>
-          </div>
-        )}
-
-        {step === 3 && (
-          <div>
-            <div className="mb-2 text-sm">For: <b>{staff?.full_name}</b></div>
-            <div className="mb-4 text-sm">Product: <b>{product?.name}</b></div>
-            <div className="flex items-center justify-center gap-4">
-              <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="h-14 w-14 rounded-lg border border-border text-2xl">−</button>
-              <div className="text-5xl font-black w-20 text-center">{qty}</div>
-              <button onClick={() => setQty((q) => q + 1)} className="h-14 w-14 rounded-lg border border-border text-2xl">+</button>
+            <div className="mb-4 flex items-center justify-center gap-4">
+              <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="h-12 w-12 rounded-lg border border-border text-2xl">−</button>
+              <div className="w-16 text-center text-4xl font-black">{qty}</div>
+              <button onClick={() => setQty((q) => q + 1)} className="h-12 w-12 rounded-lg border border-border text-2xl">+</button>
             </div>
-            <button disabled={busy} onClick={confirm}
-              className="mt-6 w-full rounded-lg bg-primary py-4 font-bold uppercase tracking-widest text-primary-foreground disabled:opacity-50">
-              Confirm
+            <button disabled={busy || !productId} onClick={confirm}
+              className="w-full rounded-lg bg-primary py-4 font-bold uppercase tracking-widest text-primary-foreground disabled:opacity-50">
+              Confirm (FREE)
             </button>
             <button onClick={() => setStep(2)} className="mt-3 w-full text-center text-sm text-muted-foreground">← back</button>
           </div>
