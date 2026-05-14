@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useTenant } from "@/lib/tenant-context";
+import { PasswordInput } from "@/components/PasswordInput";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/login")({
@@ -72,8 +73,8 @@ function LoginPage() {
           </div>
           <div>
             <label className="mb-2 block text-xs uppercase tracking-widest text-muted-foreground">Contraseña</label>
-            <input
-              type="password" autoComplete="current-password"
+            <PasswordInput
+              autoComplete="current-password"
               value={p} onChange={(e) => setP(e.target.value)}
               className="w-full rounded-lg border border-border bg-input px-4 py-4 text-lg outline-none ring-ring focus:ring-2"
             />
@@ -85,7 +86,7 @@ function LoginPage() {
         </form>
         <p className="mt-6 text-center text-xs text-muted-foreground">HECHO CON AMOR PARA TEMPLITO!</p>
         <p className="mt-2 text-center text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-          <Link to="/platform-login" className="hover:text-foreground">Acceso plataforma</Link>
+          <Link to="/platform-login" className="hover:text-foreground">ACCESO ADMINISTRADOR</Link>
         </p>
       </div>
     </div>

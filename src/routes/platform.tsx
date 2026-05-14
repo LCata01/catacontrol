@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { listCompanies, createCompany, toggleCompanyActive, resetCompanyPassword } from "@/lib/tenant.functions";
 import { TopBar } from "@/components/TopBar";
+import { PasswordInput } from "@/components/PasswordInput";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/platform")({
@@ -85,7 +86,7 @@ function PlatformPage() {
               className="rounded-lg border border-border bg-input px-4 py-3" />
             <input required placeholder="CÓDIGO" value={code} onChange={e => setCode(e.target.value.toUpperCase())}
               className="rounded-lg border border-border bg-input px-4 py-3 uppercase" />
-            <input required type="password" placeholder="Contraseña" value={pwd} onChange={e => setPwd(e.target.value)}
+            <PasswordInput required placeholder="Contraseña" value={pwd} onChange={e => setPwd(e.target.value)}
               className="rounded-lg border border-border bg-input px-4 py-3" />
             <button disabled={busy} className="md:col-span-3 rounded-lg bg-primary py-3 font-bold uppercase tracking-widest text-primary-foreground disabled:opacity-50">
               {busy ? "Creando…" : "Crear boliche"}

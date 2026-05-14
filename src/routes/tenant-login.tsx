@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useTenant } from "@/lib/tenant-context";
 import { tenantLogin } from "@/lib/tenant.functions";
+import { PasswordInput } from "@/components/PasswordInput";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/tenant-login")({
@@ -56,8 +57,8 @@ function TenantLoginPage() {
           </div>
           <div>
             <label className="mb-2 block text-xs uppercase tracking-widest text-muted-foreground">Contraseña del boliche</label>
-            <input
-              type="password" value={pwd} onChange={(e) => setPwd(e.target.value)}
+            <PasswordInput
+              value={pwd} onChange={(e) => setPwd(e.target.value)}
               className="w-full rounded-lg border border-border bg-input px-4 py-4 text-lg outline-none ring-ring focus:ring-2"
             />
           </div>
@@ -67,7 +68,7 @@ function TenantLoginPage() {
           >{busy ? "…" : "Continuar"}</button>
         </form>
         <p className="mt-6 text-center text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-          <Link to="/platform-login" className="hover:text-foreground">Acceso plataforma</Link>
+          <Link to="/platform-login" className="hover:text-foreground">ACCESO ADMINISTRADOR</Link>
         </p>
       </div>
     </div>
