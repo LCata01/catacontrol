@@ -68,6 +68,7 @@ function detectCutter(name: string): "full" | "partial" | "none" {
 }
 
 async function ensureConnected() {
+  configureSigning();
   if (qz.websocket.isActive()) return;
   if (connectPromise) return connectPromise;
   connectPromise = (async () => {
