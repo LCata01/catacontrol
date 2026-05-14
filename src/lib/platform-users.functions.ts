@@ -209,3 +209,38 @@ export const updateCompanyUser = createServerFn({ method: "POST" })
 
     return { ok: true };
   });
+
+export const deleteCompanyUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        companyId: z.string().uuid(),
+        targetUserId: z.string().uuid(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    await assertPlatformAdmin(context.supabase, context.userId);
+
+    const { data: target } = await supabaseAdmin
+      .from("profiles")
+      .select("id, company_id")
+      .eq("id", data.targetUserId)
+      .maybeSingle();
+    if (!target || target.company_id !== data.companyId) {
+      throw new Error("Usuario no pertenece a este boliche");
+    }
+
+    const [{ error: rolesErr }, { error: profileErr }] = await Promise.all([
+      supabaseAdmin.from("user_roles").delete().eq("user_id", data.targetUserId),
+      supabaseAdmin.from("profiles").delete().eq("id", data.targetUserId),
+    ]);
+    if (rolesErr) throw new Error(rolesErr.message);
+    if (profileErr) throw new Error(profileErr.message);
+
+    const { error: authErr } = await supabaseAdmin.auth.admin.deleteUser(data.targetUserId);
+    if (authErr) throw new Error(authErr.message);
+
+    return { ok: true };
+  });
