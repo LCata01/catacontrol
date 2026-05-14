@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { money, dt } from "@/lib/format";
+import { printShiftCloseTicket } from "@/lib/printer";
 
 export function CloseShiftDialog({
   shift, kind, onClose, onClosed,
