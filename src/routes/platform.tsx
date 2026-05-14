@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { listCompanies, createCompany, toggleCompanyActive, resetCompanyPassword } from "@/lib/tenant.functions";
 import { TopBar } from "@/components/TopBar";
+import { PasswordInput } from "@/components/PasswordInput";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/platform")({
