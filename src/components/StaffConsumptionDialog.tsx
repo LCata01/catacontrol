@@ -5,16 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { printStaffTicket, type TicketBranding } from "@/lib/printer";
 
-const CATEGORIES: { value: string; label: string }[] = [
-  { value: "dj", label: "DJ" },
-  { value: "technical", label: "TÉCNICO" },
-  { value: "security", label: "SEGURIDAD" },
-  { value: "photography", label: "FOTOGRAFÍA" },
-  { value: "rrpp", label: "RRPP" },
-  { value: "owner", label: "DUEÑO" },
-  { value: "management", label: "GERENCIA" },
-  { value: "guest", label: "INVITADO" },
-];
+// Categorías cargadas dinámicamente desde la tabla staff_categories
 
 export function StaffConsumptionDialog({
   shiftId, barId, eventId, eventName, branding, onClose,
