@@ -84,7 +84,16 @@ export function CrudTable({
 
 function renderCell(v: any, f: Field) {
   if (f.type === "checkbox") return v ? "✓" : "—";
-  if (v === null || v === undefined) return "—";
+  if (v === null || v === undefined || v === "") return "—";
+  if (f.type === "date") {
+    // v comes as YYYY-MM-DD from Postgres; render as DD/MM/YYYY
+    const m = String(v).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return m ? `${m[3]}/${m[2]}/${m[1]}` : String(v);
+  }
+  if (f.type === "time") {
+    const m = String(v).match(/^(\d{2}):(\d{2})/);
+    return m ? `${m[1]}:${m[2]}` : String(v);
+  }
   if (typeof v === "boolean") return v ? "✓" : "—";
   return String(v);
 }
