@@ -86,7 +86,7 @@ function LoginPage() {
         </form>
         <p className="mt-6 text-center text-xs text-muted-foreground">HECHO CON AMOR PARA TEMPLITO!</p>
         <p className="mt-2 text-center text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-          <Link to="/platform-login" className="hover:text-foreground">Acceso plataforma</Link>
+          <Link to="/platform-login" className="hover:text-foreground">ACCESO ADMINISTRADOR</Link>
         </p>
       </div>
     </div>
