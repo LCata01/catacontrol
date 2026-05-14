@@ -39,9 +39,11 @@ async function resolveService(): Promise<PrintService> {
   const pref = readDriverPref();
   if (pref === "qz") return qzPrintService;
   if (pref === "cataprint") return cataprintService;
-  // auto: prefer CATAPRINT, fall back to QZ
-  const cataOk = await cataprintService.isAvailable();
-  return cataOk ? cataprintService : qzPrintService;
+  if (pref === "browser") return browserPrintService;
+  // auto: prefer CATAPRINT, then QZ, finally browser fallback
+  if (await cataprintService.isAvailable()) return cataprintService;
+  if (await qzPrintService.isAvailable()) return qzPrintService;
+  return browserPrintService;
 }
 
 /** Sync getter — returns last resolved service or QZ as safe default. */
