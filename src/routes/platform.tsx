@@ -19,7 +19,6 @@ function PlatformPage() {
   const list = useServerFn(listCompanies);
   const create = useServerFn(createCompany);
   const toggle = useServerFn(toggleCompanyActive);
-  const reset = useServerFn(resetCompanyPassword);
   const qc = useQueryClient();
 
   useEffect(() => {
