@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorkstationRouteImport } from './routes/workstation'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as BarRouteImport } from './routes/bar'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkstationEntryRouteImport } from './routes/workstation.entry'
 import { Route as WorkstationBarRouteImport } from './routes/workstation.bar'
@@ -23,6 +24,11 @@ const WorkstationRoute = WorkstationRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BarRoute = BarRouteImport.update({
+  id: '/bar',
+  path: '/bar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -43,6 +49,7 @@ const WorkstationBarRoute = WorkstationBarRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/bar': typeof BarRoute
   '/login': typeof LoginRoute
   '/workstation': typeof WorkstationRouteWithChildren
   '/workstation/bar': typeof WorkstationBarRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/bar': typeof BarRoute
   '/login': typeof LoginRoute
   '/workstation': typeof WorkstationRouteWithChildren
   '/workstation/bar': typeof WorkstationBarRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/bar': typeof BarRoute
   '/login': typeof LoginRoute
   '/workstation': typeof WorkstationRouteWithChildren
   '/workstation/bar': typeof WorkstationBarRoute
@@ -67,6 +76,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/bar'
     | '/login'
     | '/workstation'
     | '/workstation/bar'
@@ -74,6 +84,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/bar'
     | '/login'
     | '/workstation'
     | '/workstation/bar'
@@ -81,6 +92,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/bar'
     | '/login'
     | '/workstation'
     | '/workstation/bar'
@@ -89,6 +101,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BarRoute: typeof BarRoute
   LoginRoute: typeof LoginRoute
   WorkstationRoute: typeof WorkstationRouteWithChildren
 }
@@ -107,6 +120,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bar': {
+      id: '/bar'
+      path: '/bar'
+      fullPath: '/bar'
+      preLoaderRoute: typeof BarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -149,9 +169,20 @@ const WorkstationRouteWithChildren = WorkstationRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BarRoute: BarRoute,
   LoginRoute: LoginRoute,
   WorkstationRoute: WorkstationRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
