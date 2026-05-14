@@ -24,6 +24,15 @@ export function StaffConsumptionDialog({
   const [cart, setCart] = useState<Record<string, number>>({});
   const [busy, setBusy] = useState(false);
 
+  const { data: categories } = useQuery({
+    queryKey: ["staff-categories-active"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("staff_categories")
+        .select("*").eq("active", true).order("name");
+      if (error) throw error; return data!;
+    },
+  });
+
   const { data: staffList } = useQuery({
     queryKey: ["staff-by-cat", category],
     enabled: !!category,
@@ -76,7 +85,7 @@ export function StaffConsumptionDialog({
       branding: branding ?? {},
       event: eventName,
       staffName: staff.full_name,
-      staffCategory: CATEGORIES.find((c) => c.value === staff.category)?.label ?? staff.category,
+      staffCategory: staff.category,
       items,
     });
     onClose();
@@ -94,20 +103,25 @@ export function StaffConsumptionDialog({
           <div>
             <p className="mb-3 text-sm text-muted-foreground">SELECCIONAR CATEGORÍA DE STAFF</p>
             <div className="grid grid-cols-2 gap-2">
-              {CATEGORIES.map((c) => (
-                <button key={c.value}
-                  onClick={() => { setCategory(c.value); setStaffId(""); setStep(2); }}
+              {categories?.map((c: any) => (
+                <button key={c.id}
+                  onClick={() => { setCategory(c.name); setStaffId(""); setStep(2); }}
                   className="rounded-lg border border-border bg-background p-4 text-center font-bold uppercase tracking-widest hover:border-primary">
-                  {c.label}
+                  {c.name}
                 </button>
               ))}
+              {categories && categories.length === 0 && (
+                <div className="col-span-2 rounded-lg border border-border p-3 text-center text-sm text-muted-foreground">
+                  No hay categorías de staff cargadas
+                </div>
+              )}
             </div>
           </div>
         )}
 
         {step === 2 && (
           <div>
-            <p className="mb-3 text-sm">Categoría: <b>{CATEGORIES.find(c => c.value === category)?.label}</b></p>
+            <p className="mb-3 text-sm">Categoría: <b>{category}</b></p>
             <label className="mb-1 block text-xs uppercase tracking-widest text-muted-foreground">Seleccionar persona</label>
             <select value={staffId} onChange={(e) => setStaffId(e.target.value)}
               className="mb-4 w-full rounded-lg border border-border bg-input px-4 py-3 outline-none focus:ring-2 ring-ring">
