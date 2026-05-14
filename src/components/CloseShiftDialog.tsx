@@ -49,16 +49,42 @@ export function CloseShiftDialog({
     let ticketsSold = 0;
     let wristbandsSold = 0;
     let peoplePaid = 0;
+    const ticketBreakdown = new Map<string, { qty: number; people: number }>();
+    const wristbandBreakdown = new Map<string, { qty: number }>();
+    // Build a set of cancelled sale_ids to exclude their items
+    const cancelledSaleIds = new Set(summary.sales.filter((s: any) => s.cancelled).map((s: any) => s.id));
     for (const it of summary.items) {
+      if (cancelledSaleIds.has((it as any).sale_id)) continue;
       const q = Number(it.quantity || 0);
+      const name = String(it.name || "—");
       if (it.item_kind === "product") productsSold += q;
-      else if (it.item_kind === "ticket") { ticketsSold += q; peoplePaid += Number(it.people_count || 0); }
-      else if (it.item_kind === "wristband") wristbandsSold += q;
+      else if (it.item_kind === "ticket") {
+        ticketsSold += q;
+        const people = Number(it.people_count || 0);
+        peoplePaid += people;
+        const cur = ticketBreakdown.get(name) ?? { qty: 0, people: 0 };
+        ticketBreakdown.set(name, { qty: cur.qty + q, people: cur.people + people });
+      } else if (it.item_kind === "wristband") {
+        wristbandsSold += q;
+        const cur = wristbandBreakdown.get(name) ?? { qty: 0 };
+        wristbandBreakdown.set(name, { qty: cur.qty + q });
+      }
+    }
+    const compBreakdown = new Map<string, { qty: number; people: number }>();
+    for (const c of summary.comps) {
+      const name = String((c as any).ticket_category || "—");
+      const q = Number((c as any).quantity || 0);
+      const people = Number((c as any).people_count || (c as any).quantity || 0);
+      const cur = compBreakdown.get(name) ?? { qty: 0, people: 0 };
+      compBreakdown.set(name, { qty: cur.qty + q, people: cur.people + people });
     }
     const compsCount = summary.comps.reduce((s: number, x: any) => s + Number(x.quantity || 0), 0);
     const peopleComp = summary.comps.reduce((s: number, x: any) => s + Number(x.people_count || x.quantity || 0), 0);
     const consCount = summary.cons.reduce((s: number, x: any) => s + Number(x.quantity || 0), 0);
-    return { byPay, revenue, paidCount, productsSold, ticketsSold, wristbandsSold, compsCount, consCount, peoplePaid, peopleComp };
+    const ticketsByCategory = Array.from(ticketBreakdown.entries()).map(([name, v]) => ({ name, qty: v.qty, people: v.people })).sort((a, b) => a.name.localeCompare(b.name));
+    const wristbandsByCategory = Array.from(wristbandBreakdown.entries()).map(([name, v]) => ({ name, qty: v.qty })).sort((a, b) => a.name.localeCompare(b.name));
+    const compsByCategory = Array.from(compBreakdown.entries()).map(([name, v]) => ({ name, qty: v.qty, people: v.people })).sort((a, b) => a.name.localeCompare(b.name));
+    return { byPay, revenue, paidCount, productsSold, ticketsSold, wristbandsSold, compsCount, consCount, peoplePaid, peopleComp, ticketsByCategory, wristbandsByCategory, compsByCategory };
   })();
 
   const confirm = async () => {
@@ -95,6 +121,9 @@ export function CloseShiftDialog({
         wristbandsSold: totals.wristbandsSold,
         compsCount: totals.compsCount,
         peopleComp: totals.peopleComp,
+        ticketsByCategory: totals.ticketsByCategory,
+        wristbandsByCategory: totals.wristbandsByCategory,
+        compsByCategory: totals.compsByCategory,
       }).catch((e: any) => {
         toast.error(`No se pudo imprimir el cierre: ${e?.message ?? e}`);
       });
@@ -124,9 +153,39 @@ export function CloseShiftDialog({
           </>}
           {kind === "entry" && <>
             <Row k="Tickets pagados" v={String(totals?.ticketsSold ?? 0)} />
+            {totals?.ticketsByCategory.length ? (
+              <div className="ml-4 grid gap-1 border-l-2 border-border pl-3 text-xs">
+                {totals.ticketsByCategory.map((t) => (
+                  <div key={`tk-${t.name}`} className="flex justify-between">
+                    <span className="text-muted-foreground">{t.name}</span>
+                    <span>{t.qty} ({t.people} pers.)</span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
             <Row k="Personas (pagadas)" v={String(totals?.peoplePaid ?? 0)} />
             <Row k="Pulseras vendidas" v={String(totals?.wristbandsSold ?? 0)} />
+            {totals?.wristbandsByCategory.length ? (
+              <div className="ml-4 grid gap-1 border-l-2 border-border pl-3 text-xs">
+                {totals.wristbandsByCategory.map((w) => (
+                  <div key={`wb-${w.name}`} className="flex justify-between">
+                    <span className="text-muted-foreground">{w.name}</span>
+                    <span>{w.qty}</span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
             <Row k="Tickets cortesía" v={String(totals?.compsCount ?? 0)} />
+            {totals?.compsByCategory.length ? (
+              <div className="ml-4 grid gap-1 border-l-2 border-border pl-3 text-xs">
+                {totals.compsByCategory.map((c) => (
+                  <div key={`cp-${c.name}`} className="flex justify-between">
+                    <span className="text-muted-foreground">{c.name}</span>
+                    <span>{c.qty} ({c.people} pers.)</span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
             <Row k="Personas (cortesía)" v={String(totals?.peopleComp ?? 0)} />
             <Row k="Total personas" v={String((totals?.peoplePaid ?? 0) + (totals?.peopleComp ?? 0))} bold />
           </>}
