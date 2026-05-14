@@ -208,6 +208,7 @@ function BarPos() {
       {openStaff && shift && (
         <StaffConsumptionDialog
           shiftId={shift.id} barId={lock!.id} eventId={event?.id ?? null}
+          eventName={event?.name} branding={branding ?? {}}
           onClose={() => setOpenStaff(false)} />
       )}
       {openClose && shift && (
