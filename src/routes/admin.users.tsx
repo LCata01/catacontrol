@@ -199,7 +199,7 @@ function EditUserDialog({
               value={password}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
               className="w-full rounded border border-border bg-input px-3 py-2"
-              minLength={6}
+              minLength={4}
               maxLength={72}
               autoComplete="new-password"
             />

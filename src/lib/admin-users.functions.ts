@@ -27,7 +27,7 @@ export const updateUserCredentials = createServerFn({ method: "POST" })
           .regex(/^[a-zA-Z0-9_.-]+$/)
           .optional(),
         displayName: z.string().trim().max(100).optional(),
-        password: z.string().min(6).max(72).optional(),
+        password: z.string().min(4).max(72).optional(),
       })
       .parse(input),
   )

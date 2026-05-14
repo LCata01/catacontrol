@@ -65,7 +65,7 @@ export const createCompanyUser = createServerFn({ method: "POST" })
           .max(50)
           .regex(/^[a-zA-Z0-9_.-]+$/),
         displayName: z.string().trim().max(100).optional(),
-        password: z.string().min(6).max(72),
+        password: z.string().min(4).max(72),
         role: z.enum(ROLES),
       })
       .parse(input),
@@ -141,7 +141,7 @@ export const updateCompanyUser = createServerFn({ method: "POST" })
           .regex(/^[a-zA-Z0-9_.-]+$/)
           .optional(),
         displayName: z.string().trim().max(100).optional(),
-        password: z.string().min(6).max(72).optional(),
+        password: z.string().min(4).max(72).optional(),
         role: z.enum(ROLES).optional(),
         active: z.boolean().optional(),
       })
