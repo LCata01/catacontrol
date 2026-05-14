@@ -251,7 +251,7 @@ function BarPos() {
       {openClose && shift && (
         <CloseShiftDialog
           shift={shift} kind="bar" onClose={() => setOpenClose(false)}
-          onClosed={() => { setLock(null); navigate({ to: "/workstation" }); }} />
+          onClosed={() => { setActivePrinter(null); setPrinterReady(false); setLock(null); navigate({ to: "/workstation" }); }} />
       )}
     </div>
   );
