@@ -1,4 +1,6 @@
-import { connectQz, getSavedPrinter, printRaw } from "./qz";
+// Browser-based ticket printing. Renders the ticket as HTML inside a hidden
+// iframe and triggers the browser's native print dialog. The user picks the
+// printer once in the dialog and can mark it as default.
 
 type Line = { qty: number; name: string; unit: number; subtotal: number };
 
@@ -19,88 +21,6 @@ export type BarTicketOpts = {
   payment: string;
 };
 
-// ----------------- ESC/POS helpers -----------------
-const ESC = "\x1B";
-const GS = "\x1D";
-const INIT = ESC + "@";
-const ALIGN_L = ESC + "a" + "\x00";
-const ALIGN_C = ESC + "a" + "\x01";
-const BOLD_ON = ESC + "E" + "\x01";
-const BOLD_OFF = ESC + "E" + "\x00";
-const SIZE_NORMAL = GS + "!" + "\x00";
-const SIZE_DBL = GS + "!" + "\x11";
-const SIZE_DBL_W = GS + "!" + "\x10";
-const CUT = GS + "V" + "B" + "\x03";
-const FEED = (n: number) => ESC + "d" + String.fromCharCode(n);
-
-const COLS = 42;
-
-function pad(s: string, n: number) {
-  if (s.length >= n) return s.slice(0, n);
-  return s + " ".repeat(n - s.length);
-}
-function padL(s: string, n: number) {
-  if (s.length >= n) return s.slice(0, n);
-  return " ".repeat(n - s.length) + s;
-}
-function hr(ch = "-") {
-  return ch.repeat(COLS) + "\n";
-}
-function money(n: number) {
-  return "$" + Number(n).toLocaleString("es-AR");
-}
-
-function buildEscPos(opts: BarTicketOpts): string {
-  const name = (opts.branding.nightclub_name || "CATA CLUB").toUpperCase();
-  const slogan = opts.branding.slogan || "";
-  const now = new Date();
-  const date = now.toLocaleDateString("es-AR");
-  const time = now.toLocaleTimeString("es-AR", { hour12: false });
-
-  let out = "";
-  out += INIT;
-  out += ALIGN_C + SIZE_DBL + BOLD_ON + name + "\n" + BOLD_OFF + SIZE_NORMAL;
-  if (slogan) out += slogan + "\n";
-  out += hr("=");
-
-  out += ALIGN_L;
-  out += pad("FECHA", 10) + padL(date, COLS - 10) + "\n";
-  out += pad("HORA", 10) + padL(time, COLS - 10) + "\n";
-  out += pad("BARRA", 10) + padL(opts.bar, COLS - 10) + "\n";
-  out += pad("CAJERO", 10) + padL(opts.cashier, COLS - 10) + "\n";
-  if (opts.event) out += pad("EVENTO", 10) + padL(opts.event, COLS - 10) + "\n";
-  out += hr();
-
-  const cQty = 4, cName = 20, cUnit = 8, cTot = COLS - cQty - cName - cUnit;
-  out += BOLD_ON;
-  out += pad("CNT", cQty) + pad("PRODUCTO", cName) + padL("P.U", cUnit) + padL("TOTAL", cTot) + "\n";
-  out += BOLD_OFF;
-  out += hr();
-  for (const l of opts.lines) {
-    const nm = l.name.length > cName ? l.name.slice(0, cName) : l.name;
-    out += pad(String(l.qty), cQty) + pad(nm, cName) + padL(money(l.unit), cUnit) + padL(money(l.subtotal), cTot) + "\n";
-    if (l.name.length > cName) {
-      out += pad("", cQty) + pad(l.name.slice(cName, cName * 2), cName) + "\n";
-    }
-  }
-  out += hr();
-
-  out += BOLD_ON + SIZE_DBL_W;
-  out += pad("TOTAL", 10) + padL(money(opts.total), COLS - 10) + "\n";
-  out += SIZE_NORMAL + BOLD_OFF;
-  out += pad("PAGO", 10) + padL(opts.payment.toUpperCase(), COLS - 10) + "\n";
-  out += hr();
-
-  out += ALIGN_C + "Gracias por su compra!\n";
-  out += `TICKET #${opts.number}\n`;
-  out += ALIGN_L;
-  out += FEED(2);
-  out += CUT;
-  return out;
-}
-
-// ----------------- Staff drink ticket -----------------
-
 export type StaffTicketOpts = {
   branding: TicketBranding;
   event?: string;
@@ -109,63 +29,174 @@ export type StaffTicketOpts = {
   items: { name: string; qty: number }[];
 };
 
-function buildStaffEscPos(opts: StaffTicketOpts): string {
+function money(n: number) {
+  return "$" + Number(n).toLocaleString("es-AR");
+}
+
+function escapeHtml(s: string) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+const TICKET_CSS = `
+  @page { size: 80mm auto; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #fff; color: #000; }
+  body { font-family: 'Courier New', ui-monospace, monospace; font-size: 12px; line-height: 1.3; padding: 4mm; width: 80mm; }
+  .center { text-align: center; }
+  .right { text-align: right; }
+  .bold { font-weight: 700; }
+  .big { font-size: 16px; font-weight: 700; }
+  .huge { font-size: 22px; font-weight: 800; }
+  .hr { border-top: 1px dashed #000; margin: 4px 0; }
+  .hr2 { border-top: 2px solid #000; margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; }
+  td { padding: 1px 0; vertical-align: top; }
+  .col-qty { width: 22px; }
+  .col-unit, .col-tot { white-space: nowrap; text-align: right; padding-left: 4px; }
+  .row { display: flex; justify-content: space-between; gap: 8px; }
+  .muted { font-size: 11px; }
+  @media print { body { width: auto; } }
+`;
+
+function buildBarHtml(opts: BarTicketOpts): string {
+  const name = (opts.branding.nightclub_name || "CATA CLUB").toUpperCase();
+  const slogan = opts.branding.slogan || "";
+  const now = new Date();
+  const date = now.toLocaleDateString("es-AR");
+  const time = now.toLocaleTimeString("es-AR", { hour12: false });
+
+  const lines = opts.lines
+    .map(
+      (l) => `
+        <tr>
+          <td class="col-qty">${l.qty}</td>
+          <td>${escapeHtml(l.name)}</td>
+          <td class="col-unit">${money(l.unit)}</td>
+          <td class="col-tot">${money(l.subtotal)}</td>
+        </tr>`,
+    )
+    .join("");
+
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Ticket #${opts.number}</title><style>${TICKET_CSS}</style></head><body>
+    <div class="center big">${escapeHtml(name)}</div>
+    ${slogan ? `<div class="center muted">${escapeHtml(slogan)}</div>` : ""}
+    <div class="hr2"></div>
+    <div class="row"><span>FECHA</span><span>${date}</span></div>
+    <div class="row"><span>HORA</span><span>${time}</span></div>
+    <div class="row"><span>BARRA</span><span>${escapeHtml(opts.bar)}</span></div>
+    <div class="row"><span>CAJERO</span><span>${escapeHtml(opts.cashier)}</span></div>
+    ${opts.event ? `<div class="row"><span>EVENTO</span><span>${escapeHtml(opts.event)}</span></div>` : ""}
+    <div class="hr"></div>
+    <table>
+      <tr class="bold"><td class="col-qty">CNT</td><td>PRODUCTO</td><td class="col-unit">P.U</td><td class="col-tot">TOTAL</td></tr>
+      ${lines}
+    </table>
+    <div class="hr"></div>
+    <div class="row huge"><span>TOTAL</span><span>${money(opts.total)}</span></div>
+    <div class="row"><span>PAGO</span><span>${escapeHtml(opts.payment.toUpperCase())}</span></div>
+    <div class="hr"></div>
+    <div class="center">Gracias por su compra!</div>
+    <div class="center bold">TICKET #${opts.number}</div>
+    <div style="height:8mm"></div>
+  </body></html>`;
+}
+
+function buildStaffHtml(opts: StaffTicketOpts): string {
   const name = (opts.branding.nightclub_name || "CATA CLUB").toUpperCase();
   const now = new Date();
   const date = now.toLocaleDateString("es-AR");
   const time = now.toLocaleTimeString("es-AR", { hour12: false });
 
-  let out = "";
-  out += INIT;
-  out += ALIGN_C + SIZE_DBL + BOLD_ON + name + "\n" + BOLD_OFF + SIZE_NORMAL;
-  out += hr("=");
-  out += ALIGN_C + SIZE_DBL + BOLD_ON + "STAFF DRINK\n" + BOLD_OFF + SIZE_NORMAL;
-  out += hr();
+  const items = opts.items
+    .map(
+      (it) => `
+        <div class="center big">${escapeHtml(it.name.toUpperCase())}</div>
+        <div class="center huge">x${it.qty}</div>
+        <div style="height:4mm"></div>`,
+    )
+    .join("");
 
-  out += ALIGN_L;
-  if (opts.event) out += pad("EVENTO", 10) + padL(opts.event, COLS - 10) + "\n";
-  out += pad("FECHA", 10) + padL(date, COLS - 10) + "\n";
-  out += pad("HORA", 10) + padL(time, COLS - 10) + "\n";
-  out += pad("PARA", 10) + padL(opts.staffName, COLS - 10) + "\n";
-  if (opts.staffCategory) out += pad("ROL", 10) + padL(opts.staffCategory.toUpperCase(), COLS - 10) + "\n";
-  out += hr();
-
-  out += ALIGN_C;
-  for (const it of opts.items) {
-    out += SIZE_DBL + BOLD_ON + (it.name.toUpperCase()) + "\n" + BOLD_OFF + SIZE_NORMAL;
-    out += SIZE_DBL_W + "x" + it.qty + "\n" + SIZE_NORMAL;
-    out += "\n";
-  }
-  out += ALIGN_L;
-  out += hr();
-  out += ALIGN_C + "CORTESIA STAFF\n";
-  out += ALIGN_L;
-  out += FEED(2);
-  out += CUT;
-  return out;
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Staff Drink</title><style>${TICKET_CSS}</style></head><body>
+    <div class="center big">${escapeHtml(name)}</div>
+    <div class="hr2"></div>
+    <div class="center big">STAFF DRINK</div>
+    <div class="hr"></div>
+    ${opts.event ? `<div class="row"><span>EVENTO</span><span>${escapeHtml(opts.event)}</span></div>` : ""}
+    <div class="row"><span>FECHA</span><span>${date}</span></div>
+    <div class="row"><span>HORA</span><span>${time}</span></div>
+    <div class="row"><span>PARA</span><span>${escapeHtml(opts.staffName)}</span></div>
+    ${opts.staffCategory ? `<div class="row"><span>ROL</span><span>${escapeHtml(opts.staffCategory.toUpperCase())}</span></div>` : ""}
+    <div class="hr"></div>
+    ${items}
+    <div class="hr"></div>
+    <div class="center bold">CORTESIA STAFF</div>
+    <div style="height:8mm"></div>
+  </body></html>`;
 }
 
-// ----------------- Public API (QZ Tray ONLY) -----------------
+function printHtml(html: string) {
+  if (typeof window === "undefined") return;
+  const iframe = document.createElement("iframe");
+  iframe.style.position = "fixed";
+  iframe.style.right = "0";
+  iframe.style.bottom = "0";
+  iframe.style.width = "0";
+  iframe.style.height = "0";
+  iframe.style.border = "0";
+  document.body.appendChild(iframe);
 
-function ensureConfigured() {
-  if (typeof window === "undefined") {
-    throw new Error("La impresión solo está disponible en el navegador.");
+  const cleanup = () => {
+    setTimeout(() => {
+      try {
+        document.body.removeChild(iframe);
+      } catch {}
+    }, 1000);
+  };
+
+  iframe.onload = () => {
+    try {
+      const win = iframe.contentWindow;
+      if (!win) return cleanup();
+      win.focus();
+      win.print();
+    } finally {
+      cleanup();
+    }
+  };
+
+  const doc = iframe.contentDocument || iframe.contentWindow?.document;
+  if (!doc) {
+    cleanup();
+    return;
   }
-  if (!getSavedPrinter()) {
-    throw new Error("No hay impresora configurada. Configurala en Admin → Impresión.");
-  }
+  doc.open();
+  doc.write(html);
+  doc.close();
 }
 
 export async function printBarTicket(opts: BarTicketOpts) {
-  ensureConfigured();
-  await connectQz();
-  const data = buildEscPos(opts);
-  await printRaw([{ type: "raw", format: "plain", data }]);
+  printHtml(buildBarHtml(opts));
 }
 
 export async function printStaffTicket(opts: StaffTicketOpts) {
-  ensureConfigured();
-  await connectQz();
-  const data = buildStaffEscPos(opts);
-  await printRaw([{ type: "raw", format: "plain", data }]);
+  printHtml(buildStaffHtml(opts));
+}
+
+export function testPrint() {
+  printHtml(
+    buildBarHtml({
+      branding: { nightclub_name: "CATA CLUB" },
+      number: "TEST",
+      bar: "BARRA 1",
+      cashier: "TEST",
+      lines: [
+        { qty: 1, name: "PRUEBA DE IMPRESION", unit: 0, subtotal: 0 },
+      ],
+      total: 0,
+      payment: "test",
+    }),
+  );
 }
