@@ -13,7 +13,9 @@ import { Route as WorkstationRouteImport } from './routes/workstation'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as EntryRouteImport } from './routes/entry'
 import { Route as BarRouteImport } from './routes/bar'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as WorkstationEntryRouteImport } from './routes/workstation.entry'
 import { Route as WorkstationBarRouteImport } from './routes/workstation.bar'
 
@@ -37,10 +39,20 @@ const BarRoute = BarRouteImport.update({
   path: '/bar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const WorkstationEntryRoute = WorkstationEntryRouteImport.update({
   id: '/entry',
@@ -55,12 +67,14 @@ const WorkstationBarRoute = WorkstationBarRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/bar': typeof BarRoute
   '/entry': typeof EntryRoute
   '/login': typeof LoginRoute
   '/workstation': typeof WorkstationRouteWithChildren
   '/workstation/bar': typeof WorkstationBarRoute
   '/workstation/entry': typeof WorkstationEntryRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,27 +84,32 @@ export interface FileRoutesByTo {
   '/workstation': typeof WorkstationRouteWithChildren
   '/workstation/bar': typeof WorkstationBarRoute
   '/workstation/entry': typeof WorkstationEntryRoute
+  '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/bar': typeof BarRoute
   '/entry': typeof EntryRoute
   '/login': typeof LoginRoute
   '/workstation': typeof WorkstationRouteWithChildren
   '/workstation/bar': typeof WorkstationBarRoute
   '/workstation/entry': typeof WorkstationEntryRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/bar'
     | '/entry'
     | '/login'
     | '/workstation'
     | '/workstation/bar'
     | '/workstation/entry'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,19 +119,23 @@ export interface FileRouteTypes {
     | '/workstation'
     | '/workstation/bar'
     | '/workstation/entry'
+    | '/admin'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/bar'
     | '/entry'
     | '/login'
     | '/workstation'
     | '/workstation/bar'
     | '/workstation/entry'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   BarRoute: typeof BarRoute
   EntryRoute: typeof EntryRoute
   LoginRoute: typeof LoginRoute
@@ -149,12 +172,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/workstation/entry': {
       id: '/workstation/entry'
@@ -173,6 +210,16 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface WorkstationRouteChildren {
   WorkstationBarRoute: typeof WorkstationBarRoute
   WorkstationEntryRoute: typeof WorkstationEntryRoute
@@ -189,6 +236,7 @@ const WorkstationRouteWithChildren = WorkstationRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   BarRoute: BarRoute,
   EntryRoute: EntryRoute,
   LoginRoute: LoginRoute,
