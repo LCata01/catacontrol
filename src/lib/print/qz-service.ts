@@ -3,13 +3,12 @@
 // Business code must NEVER import this directly; go through getPrintService().
 
 import qz from "qz-tray";
-import type {
-  PrintService,
-  PrinterCapabilities,
-  PrinterInfo,
-  TicketPrintInput,
-} from "./types";
+import type { PrintService, PrinterCapabilities, PrinterInfo, TicketPrintInput } from "./types";
 import { getQzCertificate, signQzRequest } from "./qz-signing.functions";
+
+type QzResolve<T = unknown> = (value: T) => void;
+type QzReject = (reason?: unknown) => void;
+type QzPrintData = { type: string; format: string; flavor: string; data: string };
 
 let signingConfigured = false;
 function configureSigning() {
@@ -19,14 +18,14 @@ function configureSigning() {
   // SHA512 to match server signer.
   qz.security.setSignatureAlgorithm("SHA512");
 
-  qz.security.setCertificatePromise((resolve: any, reject: any) => {
+  qz.security.setCertificatePromise((resolve: QzResolve<string>, reject: QzReject) => {
     getQzCertificate({})
       .then((r: { certificate: string }) => resolve(r.certificate))
       .catch(reject);
   });
 
   qz.security.setSignaturePromise((toSign: string) => {
-    return (resolve: any, reject: any) => {
+    return (resolve: QzResolve<string>, reject: QzReject) => {
       signQzRequest({ data: { request: toSign } })
         .then((r: { signature: string }) => resolve(r.signature))
         .catch(reject);
@@ -76,7 +75,7 @@ function isReconnectableQzError(error: unknown) {
 }
 
 async function settle(ms = 250) {
-  await new Promise((resolve) => window.setTimeout(resolve, ms));
+  await new Promise((resolve) => globalThis.setTimeout(resolve, ms));
 }
 
 async function resetConnection() {
@@ -149,7 +148,9 @@ export const qzPrintService: PrintService = {
     if (qz.websocket.isActive()) {
       try {
         await qz.websocket.disconnect();
-      } catch {}
+      } catch {
+        // Already disconnected.
+      }
     }
   },
 
@@ -171,9 +172,7 @@ export const qzPrintService: PrintService = {
       margins: 0,
     });
 
-    const data: any[] = [
-      { type: "pixel", format: "html", flavor: "plain", data: input.html },
-    ];
+    const data: QzPrintData[] = [{ type: "pixel", format: "html", flavor: "plain", data: input.html }];
 
     // Append cutter as raw ESC/POS to the same job (most drivers honor mixed).
     if (!input.noCut && caps.autoCutter !== "none") {
