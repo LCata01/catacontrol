@@ -57,8 +57,8 @@ function TenantLoginPage() {
           </div>
           <div>
             <label className="mb-2 block text-xs uppercase tracking-widest text-muted-foreground">Contraseña del boliche</label>
-            <input
-              type="password" value={pwd} onChange={(e) => setPwd(e.target.value)}
+            <PasswordInput
+              value={pwd} onChange={(e) => setPwd(e.target.value)}
               className="w-full rounded-lg border border-border bg-input px-4 py-4 text-lg outline-none ring-ring focus:ring-2"
             />
           </div>
