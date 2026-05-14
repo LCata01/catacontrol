@@ -164,7 +164,27 @@ export function CloseShiftDialog({
           {kind === "bar" && <>
             <Row k="Ventas pagadas" v={String(totals?.paidCount ?? 0)} />
             <Row k="Productos vendidos" v={String(totals?.productsSold ?? 0)} />
+            {totals?.productsByCategory.length ? (
+              <div className="ml-4 grid gap-1 border-l-2 border-border pl-3 text-xs">
+                {totals.productsByCategory.map((p) => (
+                  <div key={`pr-${p.name}`} className="flex justify-between">
+                    <span className="text-muted-foreground">{p.name}</span>
+                    <span>x{p.qty}</span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
             <Row k="Consumos staff" v={String(totals?.consCount ?? 0)} />
+            {totals?.consByCategory.length ? (
+              <div className="ml-4 grid gap-1 border-l-2 border-border pl-3 text-xs">
+                {totals.consByCategory.map((c) => (
+                  <div key={`cs-${c.name}`} className="flex justify-between">
+                    <span className="text-muted-foreground">{c.name}</span>
+                    <span>x{c.qty}</span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </>}
           {kind === "entry" && <>
             <Row k="Tickets pagados" v={String(totals?.ticketsSold ?? 0)} />
