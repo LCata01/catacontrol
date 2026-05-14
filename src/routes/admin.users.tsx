@@ -194,8 +194,7 @@ function EditUserDialog({
             <span className="mb-1 block text-xs uppercase tracking-widest text-muted-foreground">
               Nueva contraseña (dejar vacío para no cambiar)
             </span>
-            <input
-              type="text"
+            <PasswordInput
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded border border-border bg-input px-3 py-2"
