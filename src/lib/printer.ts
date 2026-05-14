@@ -255,7 +255,10 @@ function buildShiftCloseHtml(o: ShiftCloseTicketOpts): string {
       <div class="row bold"><span>CORTESIAS</span><span>${o.compsCount ?? 0}</span></div>
       ${breakdownRows("POR CATEGORIA", o.compsByCategory, true)}
       <div class="row"><span>PERSONAS CORT.</span><span>${o.peopleComp ?? 0}</span></div>
-      <div class="row bold"><span>TOTAL PERSONAS</span><span>${(o.peoplePaid ?? 0) + (o.peopleComp ?? 0)}</span></div>`;
+      <div class="hr2"></div>
+      <div class="center bold">TOTAL PERSONAS</div>
+      <div class="center huge">${(o.peoplePaid ?? 0) + (o.peopleComp ?? 0)}</div>
+      <div class="hr2"></div>`;
 
   return `<!doctype html><html><head><meta charset="utf-8"><title>Cierre de turno</title><style>${TICKET_CSS}</style></head><body>
     <div class="center big">${escapeHtml(name)}</div>
