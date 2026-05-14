@@ -111,10 +111,11 @@ function BarPos() {
     const { error: e2 } = await supabase.from("sale_items").insert(items);
     setBusy(false);
     if (e2) { toast.error(e2.message); return; }
-    toast.success(`Venta #${sale.sale_number} · ${money(total)}`);
+    const ticketNo = (sale as any).ticket_number ?? sale.sale_number;
+    toast.success(`Ticket ${ticketNo} · ${money(total)}`);
     printBarTicket({
       branding: branding ?? {},
-      number: sale.sale_number,
+      number: ticketNo,
       bar: lock?.name ?? "—",
       cashier: username ?? "—",
       event: event?.name,
