@@ -109,15 +109,16 @@ function BarPos() {
     setBusy(false);
     if (e2) { toast.error(e2.message); return; }
     toast.success(`Sale #${sale.sale_number} · ${money(total)}`);
-    printTicket({
-      title: "VENTA BARRA",
-      subtitle: `${lock?.name} · ${event?.name ?? ""}`,
-      number: `#${sale.sale_number}`,
-      lines: cart.map((i) => ({ left: `${i.qty}x ${i.name}`, right: money(i.price * i.qty) })),
+    printBarTicket({
+      branding: branding ?? {},
+      number: sale.sale_number,
+      bar: lock?.name ?? "—",
+      cashier: username ?? "—",
+      event: event?.name,
+      lines: cart.map((i) => ({ qty: i.qty, name: i.name, unit: i.price, subtotal: i.price * i.qty })),
       total, payment: pay,
     });
     setCart([]);
-    qc.invalidateQueries({ queryKey: ["shift-sales", shift.id] });
   };
 
   if (shiftLoading) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Loading…</div>;
@@ -168,10 +169,6 @@ function BarPos() {
 
         {/* Cart */}
         <div className="flex flex-col rounded-2xl border border-border bg-card">
-          <div className="border-b border-border p-4">
-            <div className="text-xs uppercase tracking-widest text-muted-foreground">Sales this shift</div>
-            <div className="text-2xl font-black">{sales?.length ?? 0} · {money((sales ?? []).reduce((s: number, x: any) => s + Number(x.total), 0))}</div>
-          </div>
           <div className="flex-1 overflow-auto p-4">
             {cart.length === 0 && <p className="text-center text-sm text-muted-foreground">Tap products to add</p>}
             {cart.map((i) => (
