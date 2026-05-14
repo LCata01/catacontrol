@@ -29,11 +29,14 @@ function loadScript(src: string): Promise<void> {
 }
 
 async function fetchCertificate(): Promise<string | null> {
-  if (cachedCert !== undefined) return cachedCert;
+  // Only cache successful fetches; retry if previous attempt returned null
+  // (e.g. secrets were added after the first call).
+  if (cachedCert) return cachedCert;
   try {
     const res = await getQzCertificate();
     cachedCert = res.certificate ?? null;
-  } catch {
+  } catch (e) {
+    console.error("[qz] fetchCertificate failed", e);
     cachedCert = null;
   }
   return cachedCert;
