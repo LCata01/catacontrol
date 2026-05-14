@@ -64,7 +64,7 @@ function LoginPage() {
             className="w-full rounded-lg bg-primary py-5 text-lg font-bold uppercase tracking-widest text-primary-foreground disabled:opacity-50"
           >{busy ? "…" : "Ingresar"}</button>
         </form>
-        <p className="mt-6 text-center text-xs text-muted-foreground">Sin acceso público · Sin registro</p>
+        <p className="mt-6 text-center text-xs text-muted-foreground">HECHO CON AMOR PARA TEMPLITO!</p>
       </div>
     </div>
   );
