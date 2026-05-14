@@ -1,6 +1,7 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { useTenant } from "@/lib/tenant-context";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/login")({
@@ -9,23 +10,26 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const { signIn, session, role, loading } = useAuth();
+  const { tenant, loading: tenantLoading, clearTenant } = useTenant();
   const navigate = useNavigate();
   const [u, setU] = useState("");
   const [p, setP] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    if (tenantLoading) return;
+    if (!tenant) { navigate({ to: "/tenant-login" }); return; }
     if (!loading && session && role && role !== "disabled") {
       navigate({ to: "/" });
     }
-  }, [loading, session, role, navigate]);
+  }, [loading, tenantLoading, tenant, session, role, navigate]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!u || !p) return;
+    if (!u || !p || !tenant) return;
     setBusy(true);
     try {
-      await signIn(u, p);
+      await signIn(u, p, tenant.code);
       toast.success("Bienvenido");
       navigate({ to: "/" });
     } catch (err: any) {
@@ -35,6 +39,8 @@ function LoginPage() {
     }
   };
 
+  if (!tenant) return null;
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
@@ -42,6 +48,19 @@ function LoginPage() {
           <h1 className="text-5xl font-black tracking-tight">CATA<span className="text-muted-foreground"> </span>CONTROL</h1>
           <p className="mt-2 text-sm uppercase tracking-[0.3em] text-muted-foreground">NIGHT APP</p>
         </div>
+
+        <div className="mb-4 flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3 text-sm">
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Boliche</div>
+            <div className="font-bold">{tenant.name}</div>
+          </div>
+          <button
+            type="button"
+            onClick={() => { clearTenant(); navigate({ to: "/tenant-login" }); }}
+            className="text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground"
+          >Cambiar</button>
+        </div>
+
         <form onSubmit={submit} className="space-y-4 rounded-2xl border border-border bg-card p-8">
           <div>
             <label className="mb-2 block text-xs uppercase tracking-widest text-muted-foreground">Usuario</label>
@@ -65,6 +84,9 @@ function LoginPage() {
           >{busy ? "…" : "Ingresar"}</button>
         </form>
         <p className="mt-6 text-center text-xs text-muted-foreground">HECHO CON AMOR PARA TEMPLITO!</p>
+        <p className="mt-2 text-center text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+          <Link to="/platform-login" className="hover:text-foreground">Acceso plataforma</Link>
+        </p>
       </div>
     </div>
   );
