@@ -253,7 +253,7 @@ function EntryPos() {
       )}
       {openClose && shift && (
         <CloseShiftDialog shift={shift} kind="entry" onClose={() => setOpenClose(false)}
-          onClosed={() => { setLock(null); navigate({ to: "/workstation" }); }} />
+          onClosed={() => { setActivePrinter(null); setPrinterReady(false); setLock(null); navigate({ to: "/workstation" }); }} />
       )}
     </div>
   );
