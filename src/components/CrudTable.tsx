@@ -122,7 +122,7 @@ function Editor({ row, fields, title, onCancel, onSave }: {
           ))}
         </div>
         <button onClick={() => onSave(val)}
-          className="mt-6 w-full rounded-lg bg-primary py-3 font-bold uppercase tracking-widest text-primary-foreground">Save</button>
+          className="mt-6 w-full rounded-lg bg-primary py-3 font-bold uppercase tracking-widest text-primary-foreground">Guardar</button>
       </div>
     </div>
   );
