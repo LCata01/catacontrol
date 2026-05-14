@@ -25,13 +25,17 @@ function LiveOps() {
       ]);
       return { event, shifts: shifts ?? [], sales: sales ?? [], cons: cons ?? [], comps: comps ?? [] };
     },
-    refetchInterval: 5000,
+    refetchInterval: 3000,
   });
 
   useEffect(() => {
     const ch = supabase.channel("admin-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "events" }, () => refetch())
       .on("postgres_changes", { event: "*", schema: "public", table: "shifts" }, () => refetch())
       .on("postgres_changes", { event: "*", schema: "public", table: "sales" }, () => refetch())
+      .on("postgres_changes", { event: "*", schema: "public", table: "sale_items" }, () => refetch())
+      .on("postgres_changes", { event: "*", schema: "public", table: "staff_consumptions" }, () => refetch())
+      .on("postgres_changes", { event: "*", schema: "public", table: "complimentary_tickets" }, () => refetch())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [refetch]);
