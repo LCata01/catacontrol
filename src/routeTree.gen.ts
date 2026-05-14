@@ -26,6 +26,7 @@ import { Route as AdminStaffRouteImport } from './routes/admin.staff'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
+import { Route as AdminPrintingRouteImport } from './routes/admin.printing'
 import { Route as AdminEventsRouteImport } from './routes/admin.events'
 import { Route as AdminEntriesRouteImport } from './routes/admin.entries'
 import { Route as AdminCashboxesRouteImport } from './routes/admin.cashboxes'
@@ -116,6 +117,11 @@ const AdminProductsRoute = AdminProductsRouteImport.update({
   path: '/products',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPrintingRoute = AdminPrintingRouteImport.update({
+  id: '/printing',
+  path: '/printing',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminEventsRoute = AdminEventsRouteImport.update({
   id: '/events',
   path: '/events',
@@ -148,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/admin/cashboxes': typeof AdminCashboxesRoute
   '/admin/entries': typeof AdminEntriesRoute
   '/admin/events': typeof AdminEventsRoute
+  '/admin/printing': typeof AdminPrintingRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -169,6 +176,7 @@ export interface FileRoutesByTo {
   '/admin/cashboxes': typeof AdminCashboxesRoute
   '/admin/entries': typeof AdminEntriesRoute
   '/admin/events': typeof AdminEventsRoute
+  '/admin/printing': typeof AdminPrintingRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -193,6 +201,7 @@ export interface FileRoutesById {
   '/admin/cashboxes': typeof AdminCashboxesRoute
   '/admin/entries': typeof AdminEntriesRoute
   '/admin/events': typeof AdminEventsRoute
+  '/admin/printing': typeof AdminPrintingRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -218,6 +227,7 @@ export interface FileRouteTypes {
     | '/admin/cashboxes'
     | '/admin/entries'
     | '/admin/events'
+    | '/admin/printing'
     | '/admin/products'
     | '/admin/reports'
     | '/admin/settings'
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/admin/cashboxes'
     | '/admin/entries'
     | '/admin/events'
+    | '/admin/printing'
     | '/admin/products'
     | '/admin/reports'
     | '/admin/settings'
@@ -262,6 +273,7 @@ export interface FileRouteTypes {
     | '/admin/cashboxes'
     | '/admin/entries'
     | '/admin/events'
+    | '/admin/printing'
     | '/admin/products'
     | '/admin/reports'
     | '/admin/settings'
@@ -405,6 +417,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminProductsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/printing': {
+      id: '/admin/printing'
+      path: '/printing'
+      fullPath: '/admin/printing'
+      preLoaderRoute: typeof AdminPrintingRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/events': {
       id: '/admin/events'
       path: '/events'
@@ -441,6 +460,7 @@ interface AdminRouteChildren {
   AdminCashboxesRoute: typeof AdminCashboxesRoute
   AdminEntriesRoute: typeof AdminEntriesRoute
   AdminEventsRoute: typeof AdminEventsRoute
+  AdminPrintingRoute: typeof AdminPrintingRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminReportsRoute: typeof AdminReportsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
@@ -456,6 +476,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCashboxesRoute: AdminCashboxesRoute,
   AdminEntriesRoute: AdminEntriesRoute,
   AdminEventsRoute: AdminEventsRoute,
+  AdminPrintingRoute: AdminPrintingRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminReportsRoute: AdminReportsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
@@ -495,13 +516,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
