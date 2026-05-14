@@ -20,7 +20,7 @@ export const Route = createFileRoute("/bar")({
 type CartItem = { product_id: string; name: string; price: number; qty: number };
 
 function BarPos() {
-  const { userId, lock, setLock } = useAuth();
+  const { userId, lock, setLock, username } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
 
@@ -43,7 +43,6 @@ function BarPos() {
       return data ?? { nightclub_name: "CATA CLUB", slogan: "", logo_url: null };
     },
   });
-  const { username } = useAuth();
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [pay, setPay] = useState<"cash" | "qr" | "card">("cash");
