@@ -45,9 +45,11 @@ export function PrinterSetup({
     setLoading(true);
     setAgentError(null);
     try {
-      await getPrintService().connect();
-      const list = await getPrintService().listPrinters();
+      const svc = getPrintService();
+      await svc.connect();
+      const list = await svc.listPrinters();
       setPrinters(list);
+      setActiveDriverId(svc.id);
       const last = getLastPrinter({ tenantId, terminalId, userId });
       const preselect =
         list.find((p) => p.name === last)?.name ?? list[0]?.name ?? "";
@@ -58,11 +60,18 @@ export function PrinterSetup({
       setPrinters([]);
       setAgentError(
         e?.message ??
-          "No se pudo conectar con el agente de impresión local (QZ Tray).",
+          "No se pudo conectar con el agente de impresión local.",
       );
     } finally {
       setLoading(false);
     }
+  };
+
+  const onChangeDriver = (d: "auto" | "cataprint" | "qz") => {
+    setDriver(d);
+    setPrintDriver(d);
+    setTestedFor(null);
+    refresh();
   };
 
   useEffect(() => {
