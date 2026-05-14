@@ -56,7 +56,7 @@ function PlatformLoginPage() {
           </div>
           <div>
             <label className="mb-2 block text-xs uppercase tracking-widest text-muted-foreground">Contraseña</label>
-            <input type="password" value={p} onChange={(e) => setP(e.target.value)}
+            <PasswordInput value={p} onChange={(e) => setP(e.target.value)}
               className="w-full rounded-lg border border-border bg-input px-4 py-4 text-lg outline-none ring-ring focus:ring-2" />
           </div>
           <button type="submit" disabled={busy}
