@@ -35,11 +35,11 @@ export function CrudTable({
     if (editing?.id) {
       const { error } = await supabase.from(table as any).update(payload).eq("id", editing.id);
       if (error) return toast.error(error.message);
-      toast.success("Saved");
+      toast.success("Guardado");
     } else {
       const { error } = await supabase.from(table as any).insert(payload);
       if (error) return toast.error(error.message);
-      toast.success("Created");
+      toast.success("Creado");
     }
     setEditing(null); setCreating(false);
     qc.invalidateQueries({ queryKey: ["crud", table] });
