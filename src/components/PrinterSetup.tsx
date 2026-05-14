@@ -38,7 +38,7 @@ export function PrinterSetup({
   const [testing, setTesting] = useState(false);
   const [testedFor, setTestedFor] = useState<string | null>(null);
   const [agentError, setAgentError] = useState<string | null>(null);
-  const [driver, setDriver] = useState<"auto" | "cataprint" | "qz">(getPrintDriverPref());
+  const [driver, setDriver] = useState<"auto" | "cataprint" | "qz" | "browser">(getPrintDriverPref());
   const [activeDriverId, setActiveDriverId] = useState<string>("auto");
 
   const refresh = async () => {
