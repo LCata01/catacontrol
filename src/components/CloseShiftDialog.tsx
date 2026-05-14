@@ -150,9 +150,39 @@ export function CloseShiftDialog({
           </>}
           {kind === "entry" && <>
             <Row k="Tickets pagados" v={String(totals?.ticketsSold ?? 0)} />
+            {totals?.ticketsByCategory.length ? (
+              <div className="ml-4 grid gap-1 border-l-2 border-border pl-3 text-xs">
+                {totals.ticketsByCategory.map((t) => (
+                  <div key={`tk-${t.name}`} className="flex justify-between">
+                    <span className="text-muted-foreground">{t.name}</span>
+                    <span>{t.qty} ({t.people} pers.)</span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
             <Row k="Personas (pagadas)" v={String(totals?.peoplePaid ?? 0)} />
             <Row k="Pulseras vendidas" v={String(totals?.wristbandsSold ?? 0)} />
+            {totals?.wristbandsByCategory.length ? (
+              <div className="ml-4 grid gap-1 border-l-2 border-border pl-3 text-xs">
+                {totals.wristbandsByCategory.map((w) => (
+                  <div key={`wb-${w.name}`} className="flex justify-between">
+                    <span className="text-muted-foreground">{w.name}</span>
+                    <span>{w.qty}</span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
             <Row k="Tickets cortesía" v={String(totals?.compsCount ?? 0)} />
+            {totals?.compsByCategory.length ? (
+              <div className="ml-4 grid gap-1 border-l-2 border-border pl-3 text-xs">
+                {totals.compsByCategory.map((c) => (
+                  <div key={`cp-${c.name}`} className="flex justify-between">
+                    <span className="text-muted-foreground">{c.name}</span>
+                    <span>{c.qty} ({c.people} pers.)</span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
             <Row k="Personas (cortesía)" v={String(totals?.peopleComp ?? 0)} />
             <Row k="Total personas" v={String((totals?.peoplePaid ?? 0) + (totals?.peopleComp ?? 0))} bold />
           </>}
