@@ -1,26 +1,27 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/")({
-  component: Index,
+  component: IndexRedirect,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
+function IndexRedirect() {
+  const navigate = useNavigate();
+  const { loading, session, role, lock } = useAuth();
 
-function Index() {
-  return <PlaceholderIndex />;
+  useEffect(() => {
+    if (loading) return;
+    if (!session) { navigate({ to: "/login" }); return; }
+    if (role === "disabled" || !role) { navigate({ to: "/login" }); return; }
+    if (role === "superadmin") { navigate({ to: "/admin" }); return; }
+    // cashier
+    if (lock?.kind === "bar") navigate({ to: "/bar" });
+    else if (lock?.kind === "entry") navigate({ to: "/entry" });
+    else navigate({ to: "/workstation" });
+  }, [loading, session, role, lock, navigate]);
+
+  return (
+    <div className="flex min-h-screen items-center justify-center text-muted-foreground">Loading…</div>
+  );
 }

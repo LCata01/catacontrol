@@ -9,38 +9,284 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WorkstationRouteImport } from './routes/workstation'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as EntryRouteImport } from './routes/entry'
+import { Route as BarRouteImport } from './routes/bar'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as WorkstationEntryRouteImport } from './routes/workstation.entry'
+import { Route as WorkstationBarRouteImport } from './routes/workstation.bar'
+import { Route as AdminWristbandsRouteImport } from './routes/admin.wristbands'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminTicketsRouteImport } from './routes/admin.tickets'
+import { Route as AdminStaffRouteImport } from './routes/admin.staff'
+import { Route as AdminReportsRouteImport } from './routes/admin.reports'
+import { Route as AdminProductsRouteImport } from './routes/admin.products'
+import { Route as AdminEventsRouteImport } from './routes/admin.events'
+import { Route as AdminEntriesRouteImport } from './routes/admin.entries'
+import { Route as AdminBarsRouteImport } from './routes/admin.bars'
 
+const WorkstationRoute = WorkstationRouteImport.update({
+  id: '/workstation',
+  path: '/workstation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EntryRoute = EntryRouteImport.update({
+  id: '/entry',
+  path: '/entry',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BarRoute = BarRouteImport.update({
+  id: '/bar',
+  path: '/bar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const WorkstationEntryRoute = WorkstationEntryRouteImport.update({
+  id: '/entry',
+  path: '/entry',
+  getParentRoute: () => WorkstationRoute,
+} as any)
+const WorkstationBarRoute = WorkstationBarRouteImport.update({
+  id: '/bar',
+  path: '/bar',
+  getParentRoute: () => WorkstationRoute,
+} as any)
+const AdminWristbandsRoute = AdminWristbandsRouteImport.update({
+  id: '/wristbands',
+  path: '/wristbands',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTicketsRoute = AdminTicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminStaffRoute = AdminStaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminReportsRoute = AdminReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProductsRoute = AdminProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminEventsRoute = AdminEventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminEntriesRoute = AdminEntriesRouteImport.update({
+  id: '/entries',
+  path: '/entries',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBarsRoute = AdminBarsRouteImport.update({
+  id: '/bars',
+  path: '/bars',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/bar': typeof BarRoute
+  '/entry': typeof EntryRoute
+  '/login': typeof LoginRoute
+  '/workstation': typeof WorkstationRouteWithChildren
+  '/admin/bars': typeof AdminBarsRoute
+  '/admin/entries': typeof AdminEntriesRoute
+  '/admin/events': typeof AdminEventsRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/staff': typeof AdminStaffRoute
+  '/admin/tickets': typeof AdminTicketsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/wristbands': typeof AdminWristbandsRoute
+  '/workstation/bar': typeof WorkstationBarRoute
+  '/workstation/entry': typeof WorkstationEntryRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/bar': typeof BarRoute
+  '/entry': typeof EntryRoute
+  '/login': typeof LoginRoute
+  '/workstation': typeof WorkstationRouteWithChildren
+  '/admin/bars': typeof AdminBarsRoute
+  '/admin/entries': typeof AdminEntriesRoute
+  '/admin/events': typeof AdminEventsRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/staff': typeof AdminStaffRoute
+  '/admin/tickets': typeof AdminTicketsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/wristbands': typeof AdminWristbandsRoute
+  '/workstation/bar': typeof WorkstationBarRoute
+  '/workstation/entry': typeof WorkstationEntryRoute
+  '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/bar': typeof BarRoute
+  '/entry': typeof EntryRoute
+  '/login': typeof LoginRoute
+  '/workstation': typeof WorkstationRouteWithChildren
+  '/admin/bars': typeof AdminBarsRoute
+  '/admin/entries': typeof AdminEntriesRoute
+  '/admin/events': typeof AdminEventsRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/staff': typeof AdminStaffRoute
+  '/admin/tickets': typeof AdminTicketsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/wristbands': typeof AdminWristbandsRoute
+  '/workstation/bar': typeof WorkstationBarRoute
+  '/workstation/entry': typeof WorkstationEntryRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/bar'
+    | '/entry'
+    | '/login'
+    | '/workstation'
+    | '/admin/bars'
+    | '/admin/entries'
+    | '/admin/events'
+    | '/admin/products'
+    | '/admin/reports'
+    | '/admin/staff'
+    | '/admin/tickets'
+    | '/admin/users'
+    | '/admin/wristbands'
+    | '/workstation/bar'
+    | '/workstation/entry'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/bar'
+    | '/entry'
+    | '/login'
+    | '/workstation'
+    | '/admin/bars'
+    | '/admin/entries'
+    | '/admin/events'
+    | '/admin/products'
+    | '/admin/reports'
+    | '/admin/staff'
+    | '/admin/tickets'
+    | '/admin/users'
+    | '/admin/wristbands'
+    | '/workstation/bar'
+    | '/workstation/entry'
+    | '/admin'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/bar'
+    | '/entry'
+    | '/login'
+    | '/workstation'
+    | '/admin/bars'
+    | '/admin/entries'
+    | '/admin/events'
+    | '/admin/products'
+    | '/admin/reports'
+    | '/admin/staff'
+    | '/admin/tickets'
+    | '/admin/users'
+    | '/admin/wristbands'
+    | '/workstation/bar'
+    | '/workstation/entry'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
+  BarRoute: typeof BarRoute
+  EntryRoute: typeof EntryRoute
+  LoginRoute: typeof LoginRoute
+  WorkstationRoute: typeof WorkstationRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/workstation': {
+      id: '/workstation'
+      path: '/workstation'
+      fullPath: '/workstation'
+      preLoaderRoute: typeof WorkstationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/entry': {
+      id: '/entry'
+      path: '/entry'
+      fullPath: '/entry'
+      preLoaderRoute: typeof EntryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bar': {
+      id: '/bar'
+      path: '/bar'
+      fullPath: '/bar'
+      preLoaderRoute: typeof BarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +294,143 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/workstation/entry': {
+      id: '/workstation/entry'
+      path: '/entry'
+      fullPath: '/workstation/entry'
+      preLoaderRoute: typeof WorkstationEntryRouteImport
+      parentRoute: typeof WorkstationRoute
+    }
+    '/workstation/bar': {
+      id: '/workstation/bar'
+      path: '/bar'
+      fullPath: '/workstation/bar'
+      preLoaderRoute: typeof WorkstationBarRouteImport
+      parentRoute: typeof WorkstationRoute
+    }
+    '/admin/wristbands': {
+      id: '/admin/wristbands'
+      path: '/wristbands'
+      fullPath: '/admin/wristbands'
+      preLoaderRoute: typeof AdminWristbandsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/tickets': {
+      id: '/admin/tickets'
+      path: '/tickets'
+      fullPath: '/admin/tickets'
+      preLoaderRoute: typeof AdminTicketsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/staff': {
+      id: '/admin/staff'
+      path: '/staff'
+      fullPath: '/admin/staff'
+      preLoaderRoute: typeof AdminStaffRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/reports': {
+      id: '/admin/reports'
+      path: '/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AdminReportsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/products': {
+      id: '/admin/products'
+      path: '/products'
+      fullPath: '/admin/products'
+      preLoaderRoute: typeof AdminProductsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/events': {
+      id: '/admin/events'
+      path: '/events'
+      fullPath: '/admin/events'
+      preLoaderRoute: typeof AdminEventsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/entries': {
+      id: '/admin/entries'
+      path: '/entries'
+      fullPath: '/admin/entries'
+      preLoaderRoute: typeof AdminEntriesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/bars': {
+      id: '/admin/bars'
+      path: '/bars'
+      fullPath: '/admin/bars'
+      preLoaderRoute: typeof AdminBarsRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
+interface AdminRouteChildren {
+  AdminBarsRoute: typeof AdminBarsRoute
+  AdminEntriesRoute: typeof AdminEntriesRoute
+  AdminEventsRoute: typeof AdminEventsRoute
+  AdminProductsRoute: typeof AdminProductsRoute
+  AdminReportsRoute: typeof AdminReportsRoute
+  AdminStaffRoute: typeof AdminStaffRoute
+  AdminTicketsRoute: typeof AdminTicketsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminWristbandsRoute: typeof AdminWristbandsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminBarsRoute: AdminBarsRoute,
+  AdminEntriesRoute: AdminEntriesRoute,
+  AdminEventsRoute: AdminEventsRoute,
+  AdminProductsRoute: AdminProductsRoute,
+  AdminReportsRoute: AdminReportsRoute,
+  AdminStaffRoute: AdminStaffRoute,
+  AdminTicketsRoute: AdminTicketsRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminWristbandsRoute: AdminWristbandsRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface WorkstationRouteChildren {
+  WorkstationBarRoute: typeof WorkstationBarRoute
+  WorkstationEntryRoute: typeof WorkstationEntryRoute
+}
+
+const WorkstationRouteChildren: WorkstationRouteChildren = {
+  WorkstationBarRoute: WorkstationBarRoute,
+  WorkstationEntryRoute: WorkstationEntryRoute,
+}
+
+const WorkstationRouteWithChildren = WorkstationRoute._addFileChildren(
+  WorkstationRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
+  BarRoute: BarRoute,
+  EntryRoute: EntryRoute,
+  LoginRoute: LoginRoute,
+  WorkstationRoute: WorkstationRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
