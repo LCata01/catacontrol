@@ -9,7 +9,7 @@ import { getActiveEvent, getOpenShift } from "@/lib/queries";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { money } from "@/lib/format";
-import { printTicket } from "@/lib/printer";
+import { printBarTicket } from "@/lib/printer";
 import { StaffConsumptionDialog } from "@/components/StaffConsumptionDialog";
 import { CloseShiftDialog } from "@/components/CloseShiftDialog";
 
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/bar")({
 type CartItem = { product_id: string; name: string; price: number; qty: number };
 
 function BarPos() {
-  const { userId, lock, setLock } = useAuth();
+  const { userId, lock, setLock, username } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
 
@@ -36,11 +36,11 @@ function BarPos() {
       if (error) throw error; return data!;
     },
   });
-  const { data: sales } = useQuery({
-    queryKey: ["shift-sales", shift?.id], enabled: !!shift?.id,
+  const { data: branding } = useQuery({
+    queryKey: ["app-settings"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("sales").select("*").eq("shift_id", shift!.id);
-      if (error) throw error; return data!;
+      const { data } = await supabase.from("app_settings").select("*").maybeSingle();
+      return data ?? { nightclub_name: "CATA CLUB", slogan: "", logo_url: null };
     },
   });
 
@@ -108,15 +108,16 @@ function BarPos() {
     setBusy(false);
     if (e2) { toast.error(e2.message); return; }
     toast.success(`Sale #${sale.sale_number} · ${money(total)}`);
-    printTicket({
-      title: "VENTA BARRA",
-      subtitle: `${lock?.name} · ${event?.name ?? ""}`,
-      number: `#${sale.sale_number}`,
-      lines: cart.map((i) => ({ left: `${i.qty}x ${i.name}`, right: money(i.price * i.qty) })),
+    printBarTicket({
+      branding: branding ?? {},
+      number: sale.sale_number,
+      bar: lock?.name ?? "—",
+      cashier: username ?? "—",
+      event: event?.name,
+      lines: cart.map((i) => ({ qty: i.qty, name: i.name, unit: i.price, subtotal: i.price * i.qty })),
       total, payment: pay,
     });
     setCart([]);
-    qc.invalidateQueries({ queryKey: ["shift-sales", shift.id] });
   };
 
   if (shiftLoading) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Loading…</div>;
@@ -167,10 +168,6 @@ function BarPos() {
 
         {/* Cart */}
         <div className="flex flex-col rounded-2xl border border-border bg-card">
-          <div className="border-b border-border p-4">
-            <div className="text-xs uppercase tracking-widest text-muted-foreground">Sales this shift</div>
-            <div className="text-2xl font-black">{sales?.length ?? 0} · {money((sales ?? []).reduce((s: number, x: any) => s + Number(x.total), 0))}</div>
-          </div>
           <div className="flex-1 overflow-auto p-4">
             {cart.length === 0 && <p className="text-center text-sm text-muted-foreground">Tap products to add</p>}
             {cart.map((i) => (

@@ -17,6 +17,7 @@ const tabs = [
   { to: "/admin/bars", label: "Bars" },
   { to: "/admin/entries", label: "Entries" },
   { to: "/admin/reports", label: "Reports" },
+  { to: "/admin/settings", label: "Settings" },
 ];
 
 function AdminLayout() {

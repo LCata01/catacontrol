@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          id: boolean
+          logo_url: string | null
+          nightclub_name: string
+          slogan: string
+          updated_at: string
+        }
+        Insert: {
+          id?: boolean
+          logo_url?: string | null
+          nightclub_name?: string
+          slogan?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: boolean
+          logo_url?: string | null
+          nightclub_name?: string
+          slogan?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
