@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorkstationRouteImport } from './routes/workstation'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WorkstationEntryRouteImport } from './routes/workstation.entry'
+import { Route as WorkstationBarRouteImport } from './routes/workstation.bar'
 
 const WorkstationRoute = WorkstationRouteImport.update({
   id: '/workstation',
@@ -28,35 +30,67 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WorkstationEntryRoute = WorkstationEntryRouteImport.update({
+  id: '/entry',
+  path: '/entry',
+  getParentRoute: () => WorkstationRoute,
+} as any)
+const WorkstationBarRoute = WorkstationBarRouteImport.update({
+  id: '/bar',
+  path: '/bar',
+  getParentRoute: () => WorkstationRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/workstation': typeof WorkstationRoute
+  '/workstation': typeof WorkstationRouteWithChildren
+  '/workstation/bar': typeof WorkstationBarRoute
+  '/workstation/entry': typeof WorkstationEntryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/workstation': typeof WorkstationRoute
+  '/workstation': typeof WorkstationRouteWithChildren
+  '/workstation/bar': typeof WorkstationBarRoute
+  '/workstation/entry': typeof WorkstationEntryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/workstation': typeof WorkstationRoute
+  '/workstation': typeof WorkstationRouteWithChildren
+  '/workstation/bar': typeof WorkstationBarRoute
+  '/workstation/entry': typeof WorkstationEntryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/workstation'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/workstation'
+    | '/workstation/bar'
+    | '/workstation/entry'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/workstation'
-  id: '__root__' | '/' | '/login' | '/workstation'
+  to:
+    | '/'
+    | '/login'
+    | '/workstation'
+    | '/workstation/bar'
+    | '/workstation/entry'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/workstation'
+    | '/workstation/bar'
+    | '/workstation/entry'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
-  WorkstationRoute: typeof WorkstationRoute
+  WorkstationRoute: typeof WorkstationRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -82,13 +116,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/workstation/entry': {
+      id: '/workstation/entry'
+      path: '/entry'
+      fullPath: '/workstation/entry'
+      preLoaderRoute: typeof WorkstationEntryRouteImport
+      parentRoute: typeof WorkstationRoute
+    }
+    '/workstation/bar': {
+      id: '/workstation/bar'
+      path: '/bar'
+      fullPath: '/workstation/bar'
+      preLoaderRoute: typeof WorkstationBarRouteImport
+      parentRoute: typeof WorkstationRoute
+    }
   }
 }
+
+interface WorkstationRouteChildren {
+  WorkstationBarRoute: typeof WorkstationBarRoute
+  WorkstationEntryRoute: typeof WorkstationEntryRoute
+}
+
+const WorkstationRouteChildren: WorkstationRouteChildren = {
+  WorkstationBarRoute: WorkstationBarRoute,
+  WorkstationEntryRoute: WorkstationEntryRoute,
+}
+
+const WorkstationRouteWithChildren = WorkstationRoute._addFileChildren(
+  WorkstationRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
-  WorkstationRoute: WorkstationRoute,
+  WorkstationRoute: WorkstationRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
