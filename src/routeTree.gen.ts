@@ -10,6 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorkstationRouteImport } from './routes/workstation'
+import { Route as TenantLoginRouteImport } from './routes/tenant-login'
+import { Route as PlatformLoginRouteImport } from './routes/platform-login'
+import { Route as PlatformRouteImport } from './routes/platform'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as EntryRouteImport } from './routes/entry'
 import { Route as BarRouteImport } from './routes/bar'
@@ -37,6 +40,21 @@ import { Route as AdminBarsRouteImport } from './routes/admin.bars'
 const WorkstationRoute = WorkstationRouteImport.update({
   id: '/workstation',
   path: '/workstation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TenantLoginRoute = TenantLoginRouteImport.update({
+  id: '/tenant-login',
+  path: '/tenant-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformLoginRoute = PlatformLoginRouteImport.update({
+  id: '/platform-login',
+  path: '/platform-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformRoute = PlatformRouteImport.update({
+  id: '/platform',
+  path: '/platform',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -161,6 +179,9 @@ export interface FileRoutesByFullPath {
   '/bar': typeof BarRoute
   '/entry': typeof EntryRoute
   '/login': typeof LoginRoute
+  '/platform': typeof PlatformRoute
+  '/platform-login': typeof PlatformLoginRoute
+  '/tenant-login': typeof TenantLoginRoute
   '/workstation': typeof WorkstationRouteWithChildren
   '/admin/bars': typeof AdminBarsRoute
   '/admin/cashboxes': typeof AdminCashboxesRoute
@@ -186,6 +207,9 @@ export interface FileRoutesByTo {
   '/bar': typeof BarRoute
   '/entry': typeof EntryRoute
   '/login': typeof LoginRoute
+  '/platform': typeof PlatformRoute
+  '/platform-login': typeof PlatformLoginRoute
+  '/tenant-login': typeof TenantLoginRoute
   '/admin/bars': typeof AdminBarsRoute
   '/admin/cashboxes': typeof AdminCashboxesRoute
   '/admin/entries': typeof AdminEntriesRoute
@@ -212,6 +236,9 @@ export interface FileRoutesById {
   '/bar': typeof BarRoute
   '/entry': typeof EntryRoute
   '/login': typeof LoginRoute
+  '/platform': typeof PlatformRoute
+  '/platform-login': typeof PlatformLoginRoute
+  '/tenant-login': typeof TenantLoginRoute
   '/workstation': typeof WorkstationRouteWithChildren
   '/admin/bars': typeof AdminBarsRoute
   '/admin/cashboxes': typeof AdminCashboxesRoute
@@ -240,6 +267,9 @@ export interface FileRouteTypes {
     | '/bar'
     | '/entry'
     | '/login'
+    | '/platform'
+    | '/platform-login'
+    | '/tenant-login'
     | '/workstation'
     | '/admin/bars'
     | '/admin/cashboxes'
@@ -265,6 +295,9 @@ export interface FileRouteTypes {
     | '/bar'
     | '/entry'
     | '/login'
+    | '/platform'
+    | '/platform-login'
+    | '/tenant-login'
     | '/admin/bars'
     | '/admin/cashboxes'
     | '/admin/entries'
@@ -290,6 +323,9 @@ export interface FileRouteTypes {
     | '/bar'
     | '/entry'
     | '/login'
+    | '/platform'
+    | '/platform-login'
+    | '/tenant-login'
     | '/workstation'
     | '/admin/bars'
     | '/admin/cashboxes'
@@ -317,6 +353,9 @@ export interface RootRouteChildren {
   BarRoute: typeof BarRoute
   EntryRoute: typeof EntryRoute
   LoginRoute: typeof LoginRoute
+  PlatformRoute: typeof PlatformRoute
+  PlatformLoginRoute: typeof PlatformLoginRoute
+  TenantLoginRoute: typeof TenantLoginRoute
   WorkstationRoute: typeof WorkstationRouteWithChildren
 }
 
@@ -327,6 +366,27 @@ declare module '@tanstack/react-router' {
       path: '/workstation'
       fullPath: '/workstation'
       preLoaderRoute: typeof WorkstationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tenant-login': {
+      id: '/tenant-login'
+      path: '/tenant-login'
+      fullPath: '/tenant-login'
+      preLoaderRoute: typeof TenantLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform-login': {
+      id: '/platform-login'
+      path: '/platform-login'
+      fullPath: '/platform-login'
+      preLoaderRoute: typeof PlatformLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform': {
+      id: '/platform'
+      path: '/platform'
+      fullPath: '/platform'
+      preLoaderRoute: typeof PlatformRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -553,6 +613,9 @@ const rootRouteChildren: RootRouteChildren = {
   BarRoute: BarRoute,
   EntryRoute: EntryRoute,
   LoginRoute: LoginRoute,
+  PlatformRoute: PlatformRoute,
+  PlatformLoginRoute: PlatformLoginRoute,
+  TenantLoginRoute: TenantLoginRoute,
   WorkstationRoute: WorkstationRouteWithChildren,
 }
 export const routeTree = rootRouteImport
