@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link, Outlet, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/lib/auth-context";
@@ -15,6 +15,7 @@ export const Route = createFileRoute("/platform")({
 function PlatformPage() {
   const { loading, session, role, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const list = useServerFn(listCompanies);
   const create = useServerFn(createCompany);
   const toggle = useServerFn(toggleCompanyActive);
@@ -66,6 +67,10 @@ function PlatformPage() {
 
   if (loading || !session || role !== "platform_admin") {
     return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Cargando…</div>;
+  }
+
+  if (location.pathname.startsWith("/platform/company/")) {
+    return <Outlet />;
   }
 
   return (

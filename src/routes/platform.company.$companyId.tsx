@@ -11,6 +11,7 @@ import {
   listCompanyUsers,
   createCompanyUser,
   updateCompanyUser,
+  deleteCompanyUser,
 } from "@/lib/platform-users.functions";
 
 export const Route = createFileRoute("/platform/company/$companyId")({
@@ -46,6 +47,7 @@ function CompanyDetailPage() {
   const listUsers = useServerFn(listCompanyUsers);
   const createUser = useServerFn(createCompanyUser);
   const updateUser = useServerFn(updateCompanyUser);
+  const deleteUser = useServerFn(deleteCompanyUser);
 
   useEffect(() => {
     if (loading) return;
@@ -143,6 +145,19 @@ function CompanyDetailPage() {
                       </button>
                       <button onClick={() => setEditing(u)} className="rounded border border-border px-3 py-1 text-xs hover:bg-accent">
                         Editar
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (!confirm(`¿Borrar el usuario ${u.username}? Esta acción no se puede deshacer.`)) return;
+                          try {
+                            await deleteUser({ data: { companyId, targetUserId: u.id } });
+                            toast.success("Usuario borrado");
+                            qc.invalidateQueries({ queryKey: ["platform-company-users", companyId] });
+                          } catch (e: any) { toast.error(prettifyError(e)); }
+                        }}
+                        className="rounded border border-destructive px-3 py-1 text-xs text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                      >
+                        Borrar
                       </button>
                     </td>
                   </tr>
