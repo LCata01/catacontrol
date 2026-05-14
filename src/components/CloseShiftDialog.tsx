@@ -15,7 +15,7 @@ export function CloseShiftDialog({
   const { data: summary } = useQuery({
     queryKey: ["close-summary", shift.id],
     queryFn: async () => {
-      const [{ data: sales }, { data: items }, { data: cons }, { data: comps }, { data: prof }, { data: place }] = await Promise.all([
+      const [{ data: sales }, { data: items }, { data: cons }, { data: comps }, { data: prof }, { data: place }, { data: branding }] = await Promise.all([
         supabase.from("sales").select("*").eq("shift_id", shift.id),
         supabase.from("sale_items").select("*, sales!inner(shift_id)").eq("sales.shift_id", shift.id),
         supabase.from("staff_consumptions").select("*").eq("shift_id", shift.id),
@@ -24,10 +24,12 @@ export function CloseShiftDialog({
         kind === "bar"
           ? supabase.from("bars").select("name").eq("id", shift.bar_id).maybeSingle()
           : supabase.from("entries").select("name").eq("id", shift.entry_id).maybeSingle(),
+        supabase.from("app_settings").select("*").maybeSingle(),
       ]);
       return {
         sales: sales ?? [], items: items ?? [], cons: cons ?? [], comps: comps ?? [],
         username: prof?.username ?? "—", placeName: (place as any)?.name ?? "—",
+        branding: branding ?? {},
       };
     },
   });
