@@ -1,0 +1,31 @@
+{
+  "name": "cataprint-agent",
+  "version": "0.1.0",
+  "description": "CATAPRINT — Local print agent for CATACONTROL. Replaces QZ Tray.",
+  "private": true,
+  "type": "commonjs",
+  "main": "src/index.js",
+  "bin": {
+    "cataprint": "src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js",
+    "package:win": "pkg . --targets node18-win-x64 --output dist/cataprint-win.exe",
+    "package:mac": "pkg . --targets node18-macos-x64 --output dist/cataprint-mac",
+    "package:linux": "pkg . --targets node18-linux-x64 --output dist/cataprint-linux"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "pdf-to-printer": "^5.6.0",
+    "puppeteer": "^22.15.0"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
+  },
+  "pkg": {
+    "assets": ["node_modules/puppeteer/**/*"],
+    "targets": ["node18"]
+  }
+}
