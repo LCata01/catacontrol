@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Printer, RefreshCw, Scissors, CircleSlash, CheckCircle2 } from "lucide-react";
+import { Printer, RefreshCw, Scissors, CircleSlash, CheckCircle2, BellOff } from "lucide-react";
 import {
   getPrintService,
   getLastPrinter,
