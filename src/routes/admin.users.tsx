@@ -5,6 +5,12 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/users")({ component: UsersPage });
 
+const ROLE_LABEL: Record<string, string> = {
+  superadmin: "Superadmin",
+  cashier: "Cajero",
+  disabled: "Deshabilitado",
+};
+
 function UsersPage() {
   const qc = useQueryClient();
   const { data } = useQuery({
@@ -26,7 +32,7 @@ function UsersPage() {
       const { error } = await supabase.from("user_roles").insert({ user_id: userId, role: role as "superadmin" | "cashier" | "disabled" });
       if (error) return toast.error(error.message);
     }
-    toast.success("Role updated");
+    toast.success("Rol actualizado");
     qc.invalidateQueries({ queryKey: ["users-admin"] });
   };
 
@@ -37,11 +43,11 @@ function UsersPage() {
 
   return (
     <div>
-      <h2 className="mb-4 text-2xl font-black uppercase">Users</h2>
+      <h2 className="mb-4 text-2xl font-black uppercase">Usuarios</h2>
       <div className="overflow-auto rounded-xl border border-border bg-card">
         <table className="w-full text-sm">
           <thead className="bg-muted text-left text-xs uppercase tracking-widest text-muted-foreground">
-            <tr><th className="px-4 py-3">Username</th><th className="px-4 py-3">Display</th><th className="px-4 py-3">Role</th><th className="px-4 py-3">Active</th></tr>
+            <tr><th className="px-4 py-3">Usuario</th><th className="px-4 py-3">Nombre</th><th className="px-4 py-3">Rol</th><th className="px-4 py-3">Estado</th></tr>
           </thead>
           <tbody>
             {data?.map((u: any) => (
@@ -52,15 +58,15 @@ function UsersPage() {
                   <select value={u.role ?? ""} onChange={(e) => setRole(u.id, e.target.value)}
                     className="rounded border border-border bg-input px-2 py-1.5">
                     <option value="">—</option>
-                    <option value="superadmin">superadmin</option>
-                    <option value="cashier">cashier</option>
-                    <option value="disabled">disabled</option>
+                    <option value="superadmin">{ROLE_LABEL.superadmin}</option>
+                    <option value="cashier">{ROLE_LABEL.cashier}</option>
+                    <option value="disabled">{ROLE_LABEL.disabled}</option>
                   </select>
                 </td>
                 <td className="px-4 py-3">
                   <button onClick={() => toggle(u.id, !u.active)}
                     className={`rounded px-3 py-1 text-xs ${u.active ? "border border-success text-success" : "border border-destructive text-destructive"}`}>
-                    {u.active ? "Active" : "Disabled"}
+                    {u.active ? "Activo" : "Deshabilitado"}
                   </button>
                 </td>
               </tr>
@@ -68,7 +74,7 @@ function UsersPage() {
           </tbody>
         </table>
       </div>
-      <p className="mt-4 text-xs text-muted-foreground">User passwords are managed by the auth system. To create new accounts, contact the system maintainer.</p>
+      <p className="mt-4 text-xs text-muted-foreground">Las contraseñas se gestionan desde el sistema de autenticación. Para crear nuevas cuentas, contactá al administrador del sistema.</p>
     </div>
   );
 }
