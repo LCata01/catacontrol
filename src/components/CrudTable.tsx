@@ -122,6 +122,10 @@ function Editor({ row, fields, title, onCancel, onSave }: {
                 </select>
               ) : f.type === "checkbox" ? (
                 <label className="flex items-center gap-2"><input type="checkbox" checked={!!val[f.key]} onChange={(e) => update(f.key, e.target.checked)} /> {f.label}</label>
+              ) : f.type === "date" || f.type === "time" ? (
+                <input type={f.type} value={val[f.key] ?? ""}
+                  onChange={(e) => update(f.key, e.target.value || null)}
+                  className="w-full rounded-lg border border-border bg-input px-3 py-2.5" />
               ) : (
                 <input type={f.type === "number" ? "number" : "text"} value={val[f.key] ?? ""}
                   onChange={(e) => update(f.key, f.type === "number" ? (e.target.value === "" ? null : Number(e.target.value)) : e.target.value)}
