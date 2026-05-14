@@ -86,6 +86,7 @@ export const qzPrintService: PrintService = {
 
   async isAvailable() {
     if (typeof window === "undefined") return false;
+    configureSigning();
     try {
       await qz.websocket.connect({ retries: 0, delay: 0 });
       return true;
