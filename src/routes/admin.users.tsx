@@ -5,6 +5,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { updateUserCredentials } from "@/lib/admin-users.functions";
+import { PasswordInput } from "@/components/PasswordInput";
 
 export const Route = createFileRoute("/admin/users")({ component: UsersPage });
 
