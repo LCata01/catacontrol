@@ -187,6 +187,75 @@ export async function printStaffTicket(opts: StaffTicketOpts) {
   await printToActivePrinter({ html: buildStaffHtml(opts), title: "Staff drink" });
 }
 
+export type ShiftCloseTicketOpts = {
+  branding: TicketBranding;
+  kind: "bar" | "entry";
+  placeName: string;
+  cashier: string;
+  openedAt: string | Date;
+  closedAt: string | Date;
+  initialCash: number;
+  byPay: { cash: number; qr: number; card: number };
+  revenue: number;
+  // bar
+  paidCount?: number;
+  productsSold?: number;
+  consCount?: number;
+  // entry
+  ticketsSold?: number;
+  peoplePaid?: number;
+  wristbandsSold?: number;
+  compsCount?: number;
+  peopleComp?: number;
+};
+
+function buildShiftCloseHtml(o: ShiftCloseTicketOpts): string {
+  const name = (o.branding.nightclub_name || "CATA CLUB").toUpperCase();
+  const open = new Date(o.openedAt);
+  const close = new Date(o.closedAt);
+  const fmt = (d: Date) =>
+    `${d.toLocaleDateString("es-AR")} ${d.toLocaleTimeString("es-AR", { hour12: false })}`;
+
+  const barRows = o.kind === "bar"
+    ? `
+      <div class="row"><span>VENTAS PAGADAS</span><span>${o.paidCount ?? 0}</span></div>
+      <div class="row"><span>PRODUCTOS</span><span>${o.productsSold ?? 0}</span></div>
+      <div class="row"><span>CONSUMOS STAFF</span><span>${o.consCount ?? 0}</span></div>`
+    : `
+      <div class="row"><span>TICKETS PAGADOS</span><span>${o.ticketsSold ?? 0}</span></div>
+      <div class="row"><span>PERSONAS PAG.</span><span>${o.peoplePaid ?? 0}</span></div>
+      <div class="row"><span>PULSERAS</span><span>${o.wristbandsSold ?? 0}</span></div>
+      <div class="row"><span>CORTESIAS</span><span>${o.compsCount ?? 0}</span></div>
+      <div class="row"><span>PERSONAS CORT.</span><span>${o.peopleComp ?? 0}</span></div>
+      <div class="row bold"><span>TOTAL PERSONAS</span><span>${(o.peoplePaid ?? 0) + (o.peopleComp ?? 0)}</span></div>`;
+
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Cierre de turno</title><style>${TICKET_CSS}</style></head><body>
+    <div class="center big">${escapeHtml(name)}</div>
+    <div class="hr2"></div>
+    <div class="center big">CIERRE DE ${o.kind === "bar" ? "BARRA" : "ENTRADA"}</div>
+    <div class="hr"></div>
+    <div class="row"><span>${o.kind === "bar" ? "BARRA" : "TERMINAL"}</span><span>${escapeHtml(o.placeName)}</span></div>
+    <div class="row"><span>CAJERO</span><span>${escapeHtml(o.cashier)}</span></div>
+    <div class="row"><span>INICIO</span><span>${fmt(open)}</span></div>
+    <div class="row"><span>FIN</span><span>${fmt(close)}</span></div>
+    <div class="row"><span>EFECTIVO INICIAL</span><span>${money(o.initialCash)}</span></div>
+    <div class="hr"></div>
+    ${barRows}
+    <div class="hr"></div>
+    <div class="center bold">RECAUDACION</div>
+    <div class="row"><span>EFECTIVO</span><span>${money(o.byPay.cash)}</span></div>
+    <div class="row"><span>QR</span><span>${money(o.byPay.qr)}</span></div>
+    <div class="row"><span>TARJETA</span><span>${money(o.byPay.card)}</span></div>
+    <div class="hr"></div>
+    <div class="row huge"><span>TOTAL</span><span>${money(o.revenue)}</span></div>
+    <div style="height:8mm"></div>
+  </body></html>`;
+}
+
+export async function printShiftCloseTicket(opts: ShiftCloseTicketOpts) {
+  await printToActivePrinter({ html: buildShiftCloseHtml(opts), title: "Cierre de turno" });
+}
+
 /** Build the standardized 80mm CATACONTROL test ticket. */
 export function buildTestTicketHtml(opts: { tenantName: string; terminalName: string }): string {
   const now = new Date();
