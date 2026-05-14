@@ -219,16 +219,36 @@ function buildShiftCloseHtml(o: ShiftCloseTicketOpts): string {
   const fmt = (d: Date) =>
     `${d.toLocaleDateString("es-AR")} ${d.toLocaleTimeString("es-AR", { hour12: false })}`;
 
+  const breakdownRows = (
+    title: string,
+    items: { name: string; qty: number; people?: number }[] | undefined,
+    showPeople: boolean,
+  ) => {
+    if (!items || items.length === 0) return "";
+    const rows = items
+      .map(
+        (it) =>
+          `<div class="row"><span>&nbsp;&nbsp;${escapeHtml(it.name)}</span><span>${it.qty}${showPeople ? ` (${it.people ?? 0}p)` : ""}</span></div>`,
+      )
+      .join("");
+    return `<div class="muted bold">${title}</div>${rows}`;
+  };
+
   const barRows = o.kind === "bar"
     ? `
       <div class="row"><span>VENTAS PAGADAS</span><span>${o.paidCount ?? 0}</span></div>
       <div class="row"><span>PRODUCTOS</span><span>${o.productsSold ?? 0}</span></div>
       <div class="row"><span>CONSUMOS STAFF</span><span>${o.consCount ?? 0}</span></div>`
     : `
-      <div class="row"><span>TICKETS PAGADOS</span><span>${o.ticketsSold ?? 0}</span></div>
+      <div class="row bold"><span>TICKETS PAGADOS</span><span>${o.ticketsSold ?? 0}</span></div>
+      ${breakdownRows("POR CATEGORIA", o.ticketsByCategory, true)}
       <div class="row"><span>PERSONAS PAG.</span><span>${o.peoplePaid ?? 0}</span></div>
-      <div class="row"><span>PULSERAS</span><span>${o.wristbandsSold ?? 0}</span></div>
-      <div class="row"><span>CORTESIAS</span><span>${o.compsCount ?? 0}</span></div>
+      <div class="hr"></div>
+      <div class="row bold"><span>PULSERAS</span><span>${o.wristbandsSold ?? 0}</span></div>
+      ${breakdownRows("POR CATEGORIA", o.wristbandsByCategory, false)}
+      <div class="hr"></div>
+      <div class="row bold"><span>CORTESIAS</span><span>${o.compsCount ?? 0}</span></div>
+      ${breakdownRows("POR CATEGORIA", o.compsByCategory, true)}
       <div class="row"><span>PERSONAS CORT.</span><span>${o.peopleComp ?? 0}</span></div>
       <div class="row bold"><span>TOTAL PERSONAS</span><span>${(o.peoplePaid ?? 0) + (o.peopleComp ?? 0)}</span></div>`;
 
