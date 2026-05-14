@@ -11,6 +11,10 @@ import { toast } from "sonner";
 import { money } from "@/lib/format";
 import { CloseShiftDialog } from "@/components/CloseShiftDialog";
 import { ComplimentaryDialog } from "@/components/ComplimentaryDialog";
+import { PrinterStatus } from "@/components/PrinterStatus";
+import { PrinterSetup } from "@/components/PrinterSetup";
+import { getActivePrinter, setActivePrinter } from "@/lib/print";
+import { useTenant } from "@/lib/tenant-context";
 
 export const Route = createFileRoute("/entry")({
   component: () => <Guard requireRole="cashier" requireLock="entry"><EntryPos /></Guard>,
@@ -25,7 +29,9 @@ type CartItem = {
 
 function EntryPos() {
   const { userId, lock, setLock } = useAuth();
+  const { tenant } = useTenant();
   const navigate = useNavigate();
+  const [printerReady, setPrinterReady] = useState(() => !!getActivePrinter());
 
   const { data: event } = useQuery({ queryKey: ["active-event"], queryFn: getActiveEvent });
   const { data: shift, isLoading, refetch } = useQuery({
