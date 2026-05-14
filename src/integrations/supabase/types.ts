@@ -93,18 +93,21 @@ export type Database = {
           company_id: string
           id: string
           name: string
+          terminal_code: string
         }
         Insert: {
           active?: boolean
           company_id?: string
           id?: string
           name: string
+          terminal_code: string
         }
         Update: {
           active?: boolean
           company_id?: string
           id?: string
           name?: string
+          terminal_code?: string
         }
         Relationships: [
           {
@@ -236,18 +239,21 @@ export type Database = {
           company_id: string
           id: string
           name: string
+          terminal_code: string
         }
         Insert: {
           active?: boolean
           company_id?: string
           id?: string
           name: string
+          terminal_code: string
         }
         Update: {
           active?: boolean
           company_id?: string
           id?: string
           name?: string
+          terminal_code?: string
         }
         Relationships: [
           {
@@ -496,6 +502,7 @@ export type Database = {
           payment_method: Database["public"]["Enums"]["payment_method"]
           sale_number: number
           shift_id: string
+          ticket_number: string | null
           total: number
           user_id: string
         }
@@ -512,6 +519,7 @@ export type Database = {
           payment_method: Database["public"]["Enums"]["payment_method"]
           sale_number?: number
           shift_id: string
+          ticket_number?: string | null
           total?: number
           user_id: string
         }
@@ -528,6 +536,7 @@ export type Database = {
           payment_method?: Database["public"]["Enums"]["payment_method"]
           sale_number?: number
           shift_id?: string
+          ticket_number?: string | null
           total?: number
           user_id?: string
         }
@@ -804,6 +813,36 @@ export type Database = {
           },
         ]
       }
+      ticket_sequences: {
+        Row: {
+          company_id: string
+          event_id: string | null
+          id: string
+          last_number: number
+          terminal_id: string
+          terminal_kind: string
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string
+          event_id?: string | null
+          id?: string
+          last_number?: number
+          terminal_id: string
+          terminal_kind: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          event_id?: string | null
+          id?: string
+          last_number?: number
+          terminal_id?: string
+          terminal_kind?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ticket_types: {
         Row: {
           active: boolean
@@ -928,6 +967,7 @@ export type Database = {
       }
       current_company_id: { Args: never; Returns: string }
       current_username: { Args: never; Returns: string }
+      gen_terminal_code: { Args: { _name: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -936,6 +976,10 @@ export type Database = {
         Returns: boolean
       }
       is_platform_admin: { Args: { _user_id: string }; Returns: boolean }
+      next_ticket_number: {
+        Args: { _event_id: string; _kind: string; _terminal_id: string }
+        Returns: string
+      }
       set_company_password: {
         Args: { _id: string; _password: string }
         Returns: undefined
