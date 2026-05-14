@@ -36,13 +36,14 @@ function BarPos() {
       if (error) throw error; return data!;
     },
   });
-  const { data: sales } = useQuery({
-    queryKey: ["shift-sales", shift?.id], enabled: !!shift?.id,
+  const { data: branding } = useQuery({
+    queryKey: ["app-settings"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("sales").select("*").eq("shift_id", shift!.id);
-      if (error) throw error; return data!;
+      const { data } = await supabase.from("app_settings").select("*").maybeSingle();
+      return data ?? { nightclub_name: "CATA CLUB", slogan: "", logo_url: null };
     },
   });
+  const { username } = useAuth();
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [pay, setPay] = useState<"cash" | "qr" | "card">("cash");
