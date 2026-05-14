@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Printer, Scissors, CircleSlash } from "lucide-react";
+import { Printer, Scissors, CircleSlash, BellOff } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -30,17 +30,25 @@ export function PrinterStatus({
     <>
       <button
         onClick={() => setOpen(true)}
-        title="Cambiar impresora"
-        className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-xs hover:bg-accent"
+        title={active?.bypass ? "Modo sin impresión — click para seleccionar impresora" : "Cambiar impresora"}
+        className={`inline-flex items-center gap-2 rounded-md border px-3 py-2 text-xs hover:bg-accent ${
+          active?.bypass ? "border-warning bg-warning/10" : "border-border bg-card"
+        }`}
       >
-        <Printer className="h-4 w-4 text-primary" />
-        <span className="hidden sm:inline font-bold uppercase tracking-widest">
-          {active?.name ?? "Sin impresora"}
-        </span>
-        {active?.cutter && active.cutter !== "none" ? (
-          <Scissors className="h-3.5 w-3.5 text-success" />
+        {active?.bypass ? (
+          <BellOff className="h-4 w-4 text-warning" />
         ) : (
-          <CircleSlash className="h-3.5 w-3.5 text-muted-foreground" />
+          <Printer className="h-4 w-4 text-primary" />
+        )}
+        <span className="hidden sm:inline font-bold uppercase tracking-widest">
+          {active?.bypass ? "Sin impresión" : (active?.name ?? "Sin impresora")}
+        </span>
+        {!active?.bypass && (
+          active?.cutter && active.cutter !== "none" ? (
+            <Scissors className="h-3.5 w-3.5 text-success" />
+          ) : (
+            <CircleSlash className="h-3.5 w-3.5 text-muted-foreground" />
+          )
         )}
       </button>
 

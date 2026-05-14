@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Printer, RefreshCw, Scissors, CircleSlash, CheckCircle2 } from "lucide-react";
+import { Printer, RefreshCw, Scissors, CircleSlash, CheckCircle2, BellOff } from "lucide-react";
 import {
   getPrintService,
   getLastPrinter,
@@ -102,6 +102,18 @@ export function PrinterSetup({
     onReady();
   };
 
+  const bypass = () => {
+    const ok = window.confirm(
+      "¿Continuar SIN impresora?\n\nNo se imprimirán tickets en esta sesión (ventas, staff, cierre de turno). Las ventas se siguen registrando normalmente.",
+    );
+    if (!ok) return;
+    setActivePrinter({ name: "(sin impresora)", cutter: "none", bypass: true });
+    toast.message("Modo sin impresión activado", {
+      description: "No se imprimirán tickets en esta sesión.",
+    });
+    onReady();
+  };
+
   const canConfirm = !!selected && testedFor === selected && !!caps;
 
   return (
@@ -192,6 +204,19 @@ export function PrinterSetup({
           Debe completar una prueba exitosa antes de abrir el turno.
         </p>
       )}
+
+      <div className="mt-6 border-t border-border pt-4">
+        <button
+          onClick={bypass}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border px-4 py-3 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:bg-accent hover:text-foreground"
+        >
+          <BellOff className="h-4 w-4" />
+          Continuar sin impresora
+        </button>
+        <p className="mt-2 text-center text-[11px] text-muted-foreground">
+          No se imprimirán tickets en esta sesión.
+        </p>
+      </div>
 
       {onCancel && (
         <div className="mt-4 text-center">

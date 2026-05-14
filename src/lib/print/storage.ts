@@ -74,6 +74,8 @@ export interface ActivePrinter {
   name: string;
   cutter: "full" | "partial" | "none";
   shiftId?: string;
+  /** When true, no tickets are printed for this session. */
+  bypass?: boolean;
 }
 
 export function getActivePrinter(): ActivePrinter | null {
