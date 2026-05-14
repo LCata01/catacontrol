@@ -498,6 +498,27 @@ export type Database = {
           },
         ]
       }
+      staff_categories: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       staff_consumptions: {
         Row: {
           bar_id: string | null
@@ -508,7 +529,7 @@ export type Database = {
           product_name: string
           quantity: number
           shift_id: string
-          staff_category: Database["public"]["Enums"]["staff_category"]
+          staff_category: string
           staff_member_id: string
           staff_name: string
           user_id: string
@@ -522,7 +543,7 @@ export type Database = {
           product_name: string
           quantity?: number
           shift_id: string
-          staff_category: Database["public"]["Enums"]["staff_category"]
+          staff_category: string
           staff_member_id: string
           staff_name: string
           user_id: string
@@ -536,7 +557,7 @@ export type Database = {
           product_name?: string
           quantity?: number
           shift_id?: string
-          staff_category?: Database["public"]["Enums"]["staff_category"]
+          staff_category?: string
           staff_member_id?: string
           staff_name?: string
           user_id?: string
@@ -582,7 +603,7 @@ export type Database = {
       staff_members: {
         Row: {
           active: boolean
-          category: Database["public"]["Enums"]["staff_category"]
+          category: string
           created_at: string
           full_name: string
           id: string
@@ -590,7 +611,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
-          category: Database["public"]["Enums"]["staff_category"]
+          category: string
           created_at?: string
           full_name: string
           id?: string
@@ -598,7 +619,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
-          category?: Database["public"]["Enums"]["staff_category"]
+          category?: string
           created_at?: string
           full_name?: string
           id?: string
