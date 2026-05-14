@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>CATA PRINT SERVICE</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body { font: 13px/1.4 -apple-system, "Segoe UI", system-ui, sans-serif; margin: 0; padding: 18px; background: #0f0f12; color: #f1f1f3; }
+  h1 { font-size: 16px; letter-spacing: 2px; margin: 0 0 4px; }
+  .sub { color: #8a8a93; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 18px; }
+  .card { background: #1a1a20; border: 1px solid #2a2a32; border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 8px 0; }
+  label { color: #b0b0bb; font-size: 12px; }
+  select, input[type=text], input[type=number] { background: #0f0f12; color: #f1f1f3; border: 1px solid #2a2a32; border-radius: 6px; padding: 6px 8px; min-width: 180px; }
+  button { background: #ea580c; color: #fff; border: 0; border-radius: 6px; padding: 8px 14px; font-weight: 700; cursor: pointer; font-size: 12px; }
+  button.secondary { background: #2a2a32; color: #f1f1f3; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; vertical-align: middle; }
+  .ok { background: #10b981; } .bad { background: #ef4444; }
+  code { background: #0f0f12; border: 1px solid #2a2a32; padding: 2px 6px; border-radius: 4px; font-size: 11px; word-break: break-all; }
+  .key { font-family: ui-monospace, monospace; font-size: 11px; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: #10b981; color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 12px; opacity: 0; transition: opacity .2s; }
+  .toast.show { opacity: 1; }
+  .toast.err { background: #ef4444; }
+</style>
+</head>
+<body>
+  <h1>CATA PRINT SERVICE</h1>
+  <div class="sub">Servicio local de impresión térmica</div>
+
+  <div class="card">
+    <div class="row"><label>Estado</label><div><span id="dot" class="dot bad"></span><span id="status">…</span></div></div>
+    <div class="row"><label>Endpoint</label><code id="endpoint">ws://localhost:47822</code></div>
+    <div class="row"><label>API Key</label><span class="key" id="apikey">…</span></div>
+    <div class="row"><label>Clientes conectados</label><span id="clients">0</span></div>
+  </div>
+
+  <div class="card">
+    <div class="row"><label>Impresora</label>
+      <select id="printer"></select>
+    </div>
+    <div class="row"><label>Ancho de papel</label>
+      <select id="width"><option value="58">58mm</option><option value="80">80mm</option></select>
+    </div>
+    <div class="row"><label>Cortar al final</label><input type="checkbox" id="cut" /></div>
+    <div class="row"><label>Auto-reconectar</label><input type="checkbox" id="auto" /></div>
+    <div class="row"><label>Beep al imprimir</label><input type="checkbox" id="beep" /></div>
+    <div class="actions">
+      <button id="save">Guardar</button>
+      <button id="test" class="secondary">Probar impresión</button>
+      <button id="refresh" class="secondary">Actualizar impresoras</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  function toast(msg, err) {
+    const t = $("toast"); t.textContent = msg;
+    t.classList.toggle("err", !!err); t.classList.add("show");
+    setTimeout(() => t.classList.remove("show"), 1800);
+  }
+  async function refreshStatus() {
+    const s = await window.api.getStatus();
+    $("status").textContent = s.running ? "En ejecución" : "Detenido";
+    $("dot").className = "dot " + (s.running ? "ok" : "bad");
+    $("endpoint").textContent = `ws://localhost:${s.port}`;
+    $("apikey").textContent = s.apiKey;
+    $("clients").textContent = s.clients;
+  }
+  async function loadPrinters(selected) {
+    const list = await window.api.listPrinters();
+    const sel = $("printer");
+    sel.innerHTML = "";
+    if (!list.length) {
+      const o = document.createElement("option");
+      o.value = ""; o.textContent = "(ninguna detectada)"; sel.appendChild(o);
+      return;
+    }
+    for (const p of list) {
+      const o = document.createElement("option");
+      o.value = p; o.textContent = p;
+      if (p === selected) o.selected = true;
+      sel.appendChild(o);
+    }
+  }
+  async function init() {
+    const cfg = await window.api.getConfig();
+    $("width").value = String(cfg.printerWidth);
+    $("cut").checked = cfg.cutEnabled;
+    $("auto").checked = cfg.autoReconnect;
+    $("beep").checked = cfg.beepOnPrint;
+    await loadPrinters(cfg.printerName);
+    await refreshStatus();
+    setInterval(refreshStatus, 3000);
+  }
+  $("save").onclick = async () => {
+    const printerName = $("printer").value || null;
+    const patch = {
+      printerName,
+      printerInterface: printerName ? `printer:${printerName}` : null,
+      printerWidth: Number($("width").value),
+      cutEnabled: $("cut").checked,
+      autoReconnect: $("auto").checked,
+      beepOnPrint: $("beep").checked,
+    };
+    await window.api.saveConfig(patch);
+    toast("Configuración guardada");
+  };
+  $("test").onclick = async () => {
+    const r = await window.api.testPrinter();
+    toast(r.ok ? "Prueba enviada" : ("Error: " + r.error), !r.ok);
+  };
+  $("refresh").onclick = async () => {
+    const cfg = await window.api.getConfig();
+    await loadPrinters(cfg.printerName);
+    toast("Impresoras actualizadas");
+  };
+  init();
+</script>
+</body>
+</html>
