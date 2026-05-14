@@ -28,5 +28,9 @@ export async function printToActivePrinter(input: TicketPrintInput) {
   if (!active) {
     throw new Error("No hay impresora seleccionada para esta sesión");
   }
+  if (active.bypass) {
+    // Bypass mode: tickets are intentionally not printed.
+    return;
+  }
   await current.printTicket(active.name, input);
 }
