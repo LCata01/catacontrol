@@ -63,12 +63,43 @@ export function CloseShiftDialog({
 
   const confirm = async () => {
     setBusy(true);
+    const closedAt = new Date().toISOString();
     const { error } = await supabase.from("shifts").update({
-      status: "closed", closed_at: new Date().toISOString(),
+      status: "closed", closed_at: closedAt,
     }).eq("id", shift.id);
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Turno cerrado");
+
+    // Print close ticket in parallel — failure should not block the close flow.
+    if (summary && totals) {
+      printShiftCloseTicket({
+        branding: summary.branding as any,
+        kind,
+        placeName: summary.placeName,
+        cashier: summary.username,
+        openedAt: shift.opened_at,
+        closedAt,
+        initialCash: Number(shift.initial_cash || 0),
+        byPay: {
+          cash: totals.byPay.cash || 0,
+          qr: totals.byPay.qr || 0,
+          card: totals.byPay.card || 0,
+        },
+        revenue: totals.revenue,
+        paidCount: totals.paidCount,
+        productsSold: totals.productsSold,
+        consCount: totals.consCount,
+        ticketsSold: totals.ticketsSold,
+        peoplePaid: totals.peoplePaid,
+        wristbandsSold: totals.wristbandsSold,
+        compsCount: totals.compsCount,
+        peopleComp: totals.peopleComp,
+      }).catch((e: any) => {
+        toast.error(`No se pudo imprimir el cierre: ${e?.message ?? e}`);
+      });
+    }
+
     onClosed();
   };
 
