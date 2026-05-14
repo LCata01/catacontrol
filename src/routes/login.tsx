@@ -40,7 +40,7 @@ function LoginPage() {
       <div className="w-full max-w-md">
         <div className="mb-10 text-center">
           <h1 className="text-5xl font-black tracking-tight">CATA<span className="text-muted-foreground"> </span>CONTROL</h1>
-          <p className="mt-2 text-sm uppercase tracking-[0.3em] text-muted-foreground">Operación de Boliche</p>
+          <p className="mt-2 text-sm uppercase tracking-[0.3em] text-muted-foreground">NIGHT APP</p>
         </div>
         <form onSubmit={submit} className="space-y-4 rounded-2xl border border-border bg-card p-8">
           <div>
