@@ -73,14 +73,27 @@ export async function loadQz(): Promise<any> {
 
 export async function connectQz(): Promise<any> {
   const qz = await loadQz();
-  if (!qz.websocket.isActive()) {
+  if (qz.websocket.isActive()) return qz;
+
+  // Try secure connection first (wss://localhost:8181), then fall back to insecure (ws://localhost:8182).
+  const attempts: Array<Record<string, any>> = [
+    { retries: 2, delay: 1 },
+    { usingSecure: false, retries: 1, delay: 1 },
+  ];
+  let lastErr: any = null;
+  for (const opts of attempts) {
     try {
-      await qz.websocket.connect();
+      await qz.websocket.connect(opts);
+      return qz;
     } catch (e) {
-      throw new Error("QZ Tray no detectado. Inicie QZ Tray para imprimir.");
+      lastErr = e;
     }
   }
-  return qz;
+  console.error("QZ connect failed:", lastErr);
+  const msg = typeof lastErr === "string" ? lastErr : (lastErr?.message || "");
+  throw new Error(
+    `No se pudo conectar a QZ Tray. Verificá que esté abierto y que hayas aceptado el certificado en https://localhost:8181 ${msg ? "(" + msg + ")" : ""}`.trim()
+  );
 }
 
 export async function isQzConnected(): Promise<boolean> {
