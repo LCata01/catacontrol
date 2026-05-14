@@ -28,6 +28,7 @@ import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminEventsRouteImport } from './routes/admin.events'
 import { Route as AdminEntriesRouteImport } from './routes/admin.entries'
+import { Route as AdminCashboxesRouteImport } from './routes/admin.cashboxes'
 import { Route as AdminBarsRouteImport } from './routes/admin.bars'
 
 const WorkstationRoute = WorkstationRouteImport.update({
@@ -125,6 +126,11 @@ const AdminEntriesRoute = AdminEntriesRouteImport.update({
   path: '/entries',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCashboxesRoute = AdminCashboxesRouteImport.update({
+  id: '/cashboxes',
+  path: '/cashboxes',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminBarsRoute = AdminBarsRouteImport.update({
   id: '/bars',
   path: '/bars',
@@ -139,6 +145,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/workstation': typeof WorkstationRouteWithChildren
   '/admin/bars': typeof AdminBarsRoute
+  '/admin/cashboxes': typeof AdminCashboxesRoute
   '/admin/entries': typeof AdminEntriesRoute
   '/admin/events': typeof AdminEventsRoute
   '/admin/products': typeof AdminProductsRoute
@@ -159,6 +166,7 @@ export interface FileRoutesByTo {
   '/entry': typeof EntryRoute
   '/login': typeof LoginRoute
   '/admin/bars': typeof AdminBarsRoute
+  '/admin/cashboxes': typeof AdminCashboxesRoute
   '/admin/entries': typeof AdminEntriesRoute
   '/admin/events': typeof AdminEventsRoute
   '/admin/products': typeof AdminProductsRoute
@@ -182,6 +190,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/workstation': typeof WorkstationRouteWithChildren
   '/admin/bars': typeof AdminBarsRoute
+  '/admin/cashboxes': typeof AdminCashboxesRoute
   '/admin/entries': typeof AdminEntriesRoute
   '/admin/events': typeof AdminEventsRoute
   '/admin/products': typeof AdminProductsRoute
@@ -206,6 +215,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/workstation'
     | '/admin/bars'
+    | '/admin/cashboxes'
     | '/admin/entries'
     | '/admin/events'
     | '/admin/products'
@@ -226,6 +236,7 @@ export interface FileRouteTypes {
     | '/entry'
     | '/login'
     | '/admin/bars'
+    | '/admin/cashboxes'
     | '/admin/entries'
     | '/admin/events'
     | '/admin/products'
@@ -248,6 +259,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/workstation'
     | '/admin/bars'
+    | '/admin/cashboxes'
     | '/admin/entries'
     | '/admin/events'
     | '/admin/products'
@@ -407,6 +419,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEntriesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/cashboxes': {
+      id: '/admin/cashboxes'
+      path: '/cashboxes'
+      fullPath: '/admin/cashboxes'
+      preLoaderRoute: typeof AdminCashboxesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/bars': {
       id: '/admin/bars'
       path: '/bars'
@@ -419,6 +438,7 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminBarsRoute: typeof AdminBarsRoute
+  AdminCashboxesRoute: typeof AdminCashboxesRoute
   AdminEntriesRoute: typeof AdminEntriesRoute
   AdminEventsRoute: typeof AdminEventsRoute
   AdminProductsRoute: typeof AdminProductsRoute
@@ -433,6 +453,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminBarsRoute: AdminBarsRoute,
+  AdminCashboxesRoute: AdminCashboxesRoute,
   AdminEntriesRoute: AdminEntriesRoute,
   AdminEventsRoute: AdminEventsRoute,
   AdminProductsRoute: AdminProductsRoute,
