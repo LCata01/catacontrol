@@ -1,11 +1,13 @@
 import { ReactNode } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { useTenant } from "@/lib/tenant-context";
 import { useNavigate, Link } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export function TopBar({ title, right, back }: { title: string; right?: ReactNode; back?: string }) {
   const { username, role, signOut, lock } = useAuth();
+  const { tenant } = useTenant();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -27,7 +29,9 @@ export function TopBar({ title, right, back }: { title: string; right?: ReactNod
           <Link to={back} className="rounded-md border border-border px-3 py-2 text-sm hover:bg-accent">←</Link>
         )}
         <div>
-          <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">CATA CONTROL</div>
+          <div className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+            CATA CONTROL{tenant ? ` — ${tenant.name.toUpperCase()}` : role === "platform_admin" ? " — PLATAFORMA" : ""}
+          </div>
           <div className="text-lg font-bold leading-tight">{title}</div>
         </div>
       </div>

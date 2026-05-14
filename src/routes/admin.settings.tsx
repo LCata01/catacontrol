@@ -65,12 +65,21 @@ function SettingsPage() {
 
   const save = async () => {
     setBusy(true);
-    const { error } = await supabase.from("app_settings").update({
+    // RLS scopes to current tenant's row. If no row exists yet (new tenant), insert it.
+    const payload = {
       nightclub_name: name.trim() || "CATA CLUB",
       slogan: slogan.trim(),
       logo_url: logo.trim() || null,
       updated_at: new Date().toISOString(),
-    }).eq("id", true);
+    };
+    let { error } = await supabase.from("app_settings").update(payload as any).not("company_id", "is", null);
+    if (!error) {
+      const { data: existing } = await supabase.from("app_settings").select("company_id").maybeSingle();
+      if (!existing) {
+        const ins = await supabase.from("app_settings").insert(payload as any);
+        error = ins.error;
+      }
+    }
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Configuración guardada");

@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode, useCallback 
 import { supabase } from "@/integrations/supabase/client";
 import type { Session } from "@supabase/supabase-js";
 
-export type AppRole = "superadmin" | "cashier" | "disabled";
+export type AppRole = "superadmin" | "cashier" | "disabled" | "platform_admin";
 
 export interface SessionLock {
   kind: "bar" | "entry";
@@ -18,7 +18,8 @@ interface AuthState {
   username: string | null;
   role: AppRole | null;
   lock: SessionLock | null;
-  signIn: (username: string, password: string) => Promise<void>;
+  signIn: (username: string, password: string, companyCode: string) => Promise<void>;
+  signInPlatform: (username: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   setLock: (lock: SessionLock | null) => void;
 }
@@ -42,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUsername(prof?.username ?? null);
     const r = (roles ?? []).map((x: any) => x.role);
     if (r.includes("disabled")) setRole("disabled");
+    else if (r.includes("platform_admin")) setRole("platform_admin");
     else if (r.includes("superadmin")) setRole("superadmin");
     else if (r.includes("cashier")) setRole("cashier");
     else setRole(null);
@@ -51,7 +53,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
       if (s?.user?.id) {
-        // Defer to avoid recursion
         setTimeout(() => loadProfile(s.user.id), 0);
       } else {
         setUsername(null);
@@ -78,10 +79,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => sub.subscription.unsubscribe();
   }, [loadProfile]);
 
-  const signIn = useCallback(async (uname: string, password: string) => {
-    const email = `${uname.trim().toLowerCase()}@cata.local`;
+  const signIn = useCallback(async (uname: string, password: string, companyCode: string) => {
+    const code = companyCode.trim().toLowerCase();
+    const u = uname.trim().toLowerCase();
+    const email = `${u}@${code}.cata.local`;
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw new Error("Invalid username or password");
+    if (error) throw new Error("Usuario o contraseña incorrectos");
+  }, []);
+
+  const signInPlatform = useCallback(async (uname: string, password: string) => {
+    const u = uname.trim().toLowerCase();
+    const email = `${u}@platform.cata.local`;
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw new Error("Usuario o contraseña incorrectos");
   }, []);
 
   const signOut = useCallback(async () => {
@@ -101,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <Ctx.Provider value={{
       loading, session, userId: session?.user?.id ?? null,
-      username, role, lock, signIn, signOut, setLock,
+      username, role, lock, signIn, signInPlatform, signOut, setLock,
     }}>
       {children}
     </Ctx.Provider>
