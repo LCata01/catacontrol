@@ -48,7 +48,6 @@ app.use((req, res, next) => {
   }
   next();
 });
-app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "5mb" }));
 
 app.get("/health", (_req, res) => {
