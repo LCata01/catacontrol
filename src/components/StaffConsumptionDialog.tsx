@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { printStaffTicket, type TicketBranding } from "@/lib/printer";
 
 const CATEGORIES: { value: string; label: string }[] = [
   { value: "dj", label: "DJ" },
@@ -16,16 +17,20 @@ const CATEGORIES: { value: string; label: string }[] = [
 ];
 
 export function StaffConsumptionDialog({
-  shiftId, barId, eventId, onClose,
+  shiftId, barId, eventId, eventName, branding, onClose,
 }: {
-  shiftId: string; barId: string; eventId: string | null; onClose: () => void;
+  shiftId: string;
+  barId: string;
+  eventId: string | null;
+  eventName?: string;
+  branding?: TicketBranding;
+  onClose: () => void;
 }) {
   const { userId } = useAuth();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [category, setCategory] = useState<string | null>(null);
   const [staffId, setStaffId] = useState<string>("");
-  const [productId, setProductId] = useState<string | null>(null);
-  const [qty, setQty] = useState(1);
+  const [cart, setCart] = useState<Record<string, number>>({});
   const [busy, setBusy] = useState(false);
 
   const { data: staffList } = useQuery({
@@ -47,19 +52,42 @@ export function StaffConsumptionDialog({
   });
 
   const staff = useMemo(() => staffList?.find((s: any) => s.id === staffId), [staffList, staffId]);
-  const product = products?.find((p: any) => p.id === productId);
+  const totalQty = useMemo(() => Object.values(cart).reduce((a, b) => a + b, 0), [cart]);
+
+  const setQty = (id: string, d: number) =>
+    setCart((c) => {
+      const next = { ...c, [id]: Math.max(0, (c[id] ?? 0) + d) };
+      if (next[id] === 0) delete next[id];
+      return next;
+    });
 
   const confirm = async () => {
-    if (!staff || !product || !userId) return;
+    if (!staff || !userId || totalQty === 0) return;
     setBusy(true);
-    const { error } = await supabase.from("staff_consumptions").insert({
-      shift_id: shiftId, user_id: userId, bar_id: barId, event_id: eventId,
-      staff_member_id: staff.id, staff_name: staff.full_name, staff_category: staff.category,
-      product_id: product.id, product_name: product.name, quantity: qty,
+    const rows = Object.entries(cart).map(([pid, qty]) => {
+      const p = products!.find((x: any) => x.id === pid)!;
+      return {
+        shift_id: shiftId, user_id: userId, bar_id: barId, event_id: eventId,
+        staff_member_id: staff.id, staff_name: staff.full_name, staff_category: staff.category,
+        product_id: p.id, product_name: p.name, quantity: qty,
+      };
     });
+    const { error } = await supabase.from("staff_consumptions").insert(rows);
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Consumo de staff registrado");
+
+    const items = Object.entries(cart).map(([pid, qty]) => ({
+      name: products!.find((x: any) => x.id === pid)!.name,
+      qty,
+    }));
+    printStaffTicket({
+      branding: branding ?? {},
+      event: eventName,
+      staffName: staff.full_name,
+      staffCategory: CATEGORIES.find((c) => c.value === staff.category)?.label ?? staff.category,
+      items,
+    });
     onClose();
   };
 
@@ -115,24 +143,34 @@ export function StaffConsumptionDialog({
         {step === 3 && (
           <div>
             <div className="mb-2 text-sm">Persona: <b>{staff?.full_name}</b></div>
-            <label className="mb-1 block text-xs uppercase tracking-widest text-muted-foreground">Seleccionar producto (GRATIS)</label>
+            <label className="mb-1 block text-xs uppercase tracking-widest text-muted-foreground">
+              Seleccionar productos (GRATIS) — tocá para agregar
+            </label>
             <div className="mb-3 grid max-h-64 grid-cols-2 gap-2 overflow-auto">
-              {products?.map((p: any) => (
-                <button key={p.id} onClick={() => setProductId(p.id)}
-                  className={`rounded-lg border p-3 text-left ${productId === p.id ? "border-primary" : "border-border"} hover:border-primary`}>
-                  <div className="text-xs uppercase text-muted-foreground">{p.category}</div>
-                  <div className="font-bold">{p.name}</div>
-                </button>
-              ))}
+              {products?.map((p: any) => {
+                const q = cart[p.id] ?? 0;
+                return (
+                  <div key={p.id}
+                    className={`rounded-lg border p-3 ${q > 0 ? "border-primary" : "border-border"}`}>
+                    <div className="text-xs uppercase text-muted-foreground">{p.category}</div>
+                    <div className="font-bold">{p.name}</div>
+                    <div className="mt-2 flex items-center justify-between">
+                      <button onClick={() => setQty(p.id, -1)}
+                        className="h-8 w-8 rounded border border-border text-lg">−</button>
+                      <div className="w-8 text-center font-black">{q}</div>
+                      <button onClick={() => setQty(p.id, +1)}
+                        className="h-8 w-8 rounded border border-border text-lg">+</button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            <div className="mb-4 flex items-center justify-center gap-4">
-              <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="h-12 w-12 rounded-lg border border-border text-2xl">−</button>
-              <div className="w-16 text-center text-4xl font-black">{qty}</div>
-              <button onClick={() => setQty((q) => q + 1)} className="h-12 w-12 rounded-lg border border-border text-2xl">+</button>
+            <div className="mb-3 text-center text-sm text-muted-foreground">
+              Total productos: <b className="text-foreground">{totalQty}</b>
             </div>
-            <button disabled={busy || !productId} onClick={confirm}
+            <button disabled={busy || totalQty === 0} onClick={confirm}
               className="w-full rounded-lg bg-primary py-4 font-bold uppercase tracking-widest text-primary-foreground disabled:opacity-50">
-              Confirmar (GRATIS)
+              Confirmar e imprimir
             </button>
             <button onClick={() => setStep(2)} className="mt-3 w-full text-center text-sm text-muted-foreground">← volver</button>
           </div>
