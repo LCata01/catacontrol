@@ -75,11 +75,13 @@ export async function connectQz(): Promise<any> {
   const qz = await loadQz();
   if (qz.websocket.isActive()) return qz;
 
-  // Try secure connection first (wss://localhost:8181), then fall back to insecure (ws://localhost:8182).
-  const attempts: Array<Record<string, any>> = [
-    { retries: 2, delay: 1 },
-    { usingSecure: false, retries: 1, delay: 1 },
-  ];
+  const isHttps = window.location.protocol === "https:";
+  const attempts: Array<Record<string, any>> = isHttps
+    ? [{ usingSecure: true, retries: 3, delay: 1 }]
+    : [
+        { usingSecure: true, retries: 2, delay: 1 },
+        { usingSecure: false, retries: 1, delay: 1 },
+      ];
   let lastErr: any = null;
   for (const opts of attempts) {
     try {
@@ -92,7 +94,7 @@ export async function connectQz(): Promise<any> {
   console.error("QZ connect failed:", lastErr);
   const msg = typeof lastErr === "string" ? lastErr : (lastErr?.message || "");
   throw new Error(
-    `No se pudo conectar a QZ Tray. Verificá que esté abierto y que hayas aceptado el certificado en https://localhost:8181 ${msg ? "(" + msg + ")" : ""}`.trim()
+    `No se pudo conectar a QZ Tray. Abrí QZ Tray, verificá el ícono al lado del reloj y aceptá el certificado entrando a https://localhost.qz.io:8181/ desde este navegador. ${msg ? "(" + msg + ")" : ""}`.trim()
   );
 }
 
