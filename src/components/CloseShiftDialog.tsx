@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { money, dt } from "@/lib/format";
+import { printShiftCloseTicket } from "@/lib/printer";
 
 export function CloseShiftDialog({
   shift, kind, onClose, onClosed,
@@ -14,7 +15,7 @@ export function CloseShiftDialog({
   const { data: summary } = useQuery({
     queryKey: ["close-summary", shift.id],
     queryFn: async () => {
-      const [{ data: sales }, { data: items }, { data: cons }, { data: comps }, { data: prof }, { data: place }] = await Promise.all([
+      const [{ data: sales }, { data: items }, { data: cons }, { data: comps }, { data: prof }, { data: place }, { data: branding }] = await Promise.all([
         supabase.from("sales").select("*").eq("shift_id", shift.id),
         supabase.from("sale_items").select("*, sales!inner(shift_id)").eq("sales.shift_id", shift.id),
         supabase.from("staff_consumptions").select("*").eq("shift_id", shift.id),
@@ -23,10 +24,12 @@ export function CloseShiftDialog({
         kind === "bar"
           ? supabase.from("bars").select("name").eq("id", shift.bar_id).maybeSingle()
           : supabase.from("entries").select("name").eq("id", shift.entry_id).maybeSingle(),
+        supabase.from("app_settings").select("*").maybeSingle(),
       ]);
       return {
         sales: sales ?? [], items: items ?? [], cons: cons ?? [], comps: comps ?? [],
         username: prof?.username ?? "—", placeName: (place as any)?.name ?? "—",
+        branding: branding ?? {},
       };
     },
   });
@@ -60,12 +63,43 @@ export function CloseShiftDialog({
 
   const confirm = async () => {
     setBusy(true);
+    const closedAt = new Date().toISOString();
     const { error } = await supabase.from("shifts").update({
-      status: "closed", closed_at: new Date().toISOString(),
+      status: "closed", closed_at: closedAt,
     }).eq("id", shift.id);
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Turno cerrado");
+
+    // Print close ticket in parallel — failure should not block the close flow.
+    if (summary && totals) {
+      printShiftCloseTicket({
+        branding: summary.branding as any,
+        kind,
+        placeName: summary.placeName,
+        cashier: summary.username,
+        openedAt: shift.opened_at,
+        closedAt,
+        initialCash: Number(shift.initial_cash || 0),
+        byPay: {
+          cash: totals.byPay.cash || 0,
+          qr: totals.byPay.qr || 0,
+          card: totals.byPay.card || 0,
+        },
+        revenue: totals.revenue,
+        paidCount: totals.paidCount,
+        productsSold: totals.productsSold,
+        consCount: totals.consCount,
+        ticketsSold: totals.ticketsSold,
+        peoplePaid: totals.peoplePaid,
+        wristbandsSold: totals.wristbandsSold,
+        compsCount: totals.compsCount,
+        peopleComp: totals.peopleComp,
+      }).catch((e: any) => {
+        toast.error(`No se pudo imprimir el cierre: ${e?.message ?? e}`);
+      });
+    }
+
     onClosed();
   };
 
