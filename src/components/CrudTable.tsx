@@ -46,7 +46,7 @@ export function CrudTable({
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Delete this record?")) return;
+    if (!confirm("¿Eliminar este registro?")) return;
     const { error } = await supabase.from(table as any).delete().eq("id", id);
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["crud", table] });
