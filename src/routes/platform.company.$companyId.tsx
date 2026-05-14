@@ -17,6 +17,19 @@ export const Route = createFileRoute("/platform/company/$companyId")({
   component: CompanyDetailPage,
 });
 
+function prettifyError(e: any): string {
+  const msg = e?.message ?? String(e);
+  try {
+    const parsed = JSON.parse(msg);
+    if (Array.isArray(parsed) && parsed[0]?.message) {
+      return parsed.map((p: any) => `${p.path?.join(".") ?? ""}: ${p.message}`).join(" · ");
+    }
+  } catch {}
+  if (/at least 6 character/i.test(msg)) return "La contraseña debe tener al menos 6 caracteres";
+  if (/Invalid.*regex|String must match/i.test(msg)) return "Usuario inválido (sólo letras, números, _ . -)";
+  return msg;
+}
+
 const ROLE_LABEL: Record<string, string> = {
   superadmin: "Superadmin",
   cashier: "Cajero",
