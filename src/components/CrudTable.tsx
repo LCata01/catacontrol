@@ -11,6 +11,7 @@ export type Field = {
   /** Load select options dynamically from a Supabase table. */
   optionsFrom?: { table: string; valueColumn?: string; labelColumn?: string; activeOnly?: boolean };
   required?: boolean;
+  readonly?: boolean;
 };
 
 export function CrudTable({
