@@ -4,10 +4,7 @@
 
 import qz from "qz-tray";
 import type { PrintService, PrinterCapabilities, PrinterInfo, TicketPrintInput } from "./types";
-import { getQzCertificate, signQzRequest } from "./qz-signing.functions";
 
-type QzResolve<T = unknown> = (value: T) => void;
-type QzReject = (reason?: unknown) => void;
 type QzPrintData = { type: string; format: string; flavor: string; data: string };
 
 let signingConfigured = false;
@@ -15,20 +12,16 @@ function configureSigning() {
   if (signingConfigured) return;
   signingConfigured = true;
 
-  // SHA512 to match server signer.
-  qz.security.setSignatureAlgorithm("SHA512");
-
-  qz.security.setCertificatePromise((resolve: QzResolve<string>, reject: QzReject) => {
-    getQzCertificate({})
-      .then((r: { certificate: string }) => resolve(r.certificate))
-      .catch(reject);
+  // Use QZ Tray's built-in demo certificate. QZ Tray will show
+  // "QZ Industries, LLC (QZ Tray Demo Cert)" and allow the user to
+  // remember the decision permanently.
+  qz.security.setCertificatePromise(function (resolve: (v: unknown) => void) {
+    resolve((qz.security as { certificates: { demo: string } }).certificates.demo);
   });
 
-  qz.security.setSignaturePromise((toSign: string) => {
-    return (resolve: QzResolve<string>, reject: QzReject) => {
-      signQzRequest({ data: { request: toSign } })
-        .then((r: { signature: string }) => resolve(r.signature))
-        .catch(reject);
+  qz.security.setSignaturePromise(function () {
+    return function (resolve: () => void) {
+      resolve();
     };
   });
 }
