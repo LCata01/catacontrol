@@ -6,8 +6,6 @@ import {
   getLastPrinter,
   setLastPrinter,
   setActivePrinter,
-  getPrintDriverPref,
-  setPrintDriver,
   type PrinterInfo,
   type PrinterCapabilities,
 } from "@/lib/print";
