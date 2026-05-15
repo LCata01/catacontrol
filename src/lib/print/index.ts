@@ -11,38 +11,20 @@ import { getActivePrinter } from "./storage";
 export type { PrintService, PrinterInfo, PrinterCapabilities, TicketPrintInput } from "./types";
 export { getLastPrinter, setLastPrinter, getActivePrinter, setActivePrinter, getMachineId } from "./storage";
 
-const DRIVER_KEY = "cata_print_driver";
+type DriverId = "browser";
 
-type DriverId = "cataprint" | "qz" | "browser" | "auto";
-
-function readDriverPref(): DriverId {
-  if (typeof window === "undefined") return "auto";
-  const v = localStorage.getItem(DRIVER_KEY);
-  if (v === "cataprint" || v === "qz" || v === "browser" || v === "auto") return v;
-  return "auto";
-}
-
-export function setPrintDriver(d: DriverId) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(DRIVER_KEY, d);
-  current = null; // force re-resolve next call
+export function setPrintDriver(_d: DriverId) {
+  // Only the browser driver is supported.
 }
 
 export function getPrintDriverPref(): DriverId {
-  return readDriverPref();
+  return "browser";
 }
 
-let current: PrintService | null = null;
+let current: PrintService | null = browserPrintService;
 let resolving: Promise<PrintService> | null = null;
 
 async function resolveService(): Promise<PrintService> {
-  const pref = readDriverPref();
-  if (pref === "qz") return qzPrintService;
-  if (pref === "cataprint") return cataprintService;
-  if (pref === "browser") return browserPrintService;
-  // auto: prefer CATAPRINT, then QZ, finally browser fallback
-  if (await cataprintService.isAvailable()) return cataprintService;
-  if (await qzPrintService.isAvailable()) return qzPrintService;
   return browserPrintService;
 }
 
