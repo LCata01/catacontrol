@@ -4,13 +4,13 @@ Sistema POS multi-tenant para boliches, eventos y clubes nocturnos.
 
 CATACONTROL permite gestionar:
 
-- Venta de entradas
-- Venta en barras
-- Control de cajas
-- Múltiples terminales
-- Múltiples usuarios
-- Impresión de tickets
-- Gestión multi-establecimiento
+- venta de entradas
+- venta en barras
+- control de cajas
+- múltiples terminales
+- múltiples usuarios
+- impresión de tickets
+- gestión multi-establecimiento
 
 Diseñado para trabajar en tiempo real con múltiples operadores.
 
@@ -20,15 +20,15 @@ Diseñado para trabajar en tiempo real con múltiples operadores.
 
 ## Multi-tenant
 
-Cada cliente (boliche/evento) tiene su propio entorno aislado.
+Cada cliente opera en un entorno aislado.
 
-Ejemplo:
+Ejemplos:
 
 - TEMPLO
 - BOLICHE 2
 - CLUB 3
 
-Cada tenant tiene:
+Cada tenant tiene sus propios:
 
 - usuarios
 - cajas
@@ -38,96 +38,171 @@ Cada tenant tiene:
 
 ---
 
-## Roles
+# Roles
 
-### Super Admin
+## Super Admin
 
-Acceso global:
+Acceso global para:
 
 - crear boliches
 - editar boliches
 - eliminar boliches
 - acceder a cualquier tenant
+- monitorear terminales activas
 
-### Cashier
+---
+
+## Cashier
 
 Operadores de:
 
-- barra
-- entradas
+### Barra
 
 Ejemplos:
 
-- cashier1
-- cashier2
+- barra1
+- barra2
+- barra3
+
+### Entradas
+
+Ejemplos:
+
 - entrada1
 - entrada2
 
 ---
 
-## Terminales
+# Terminales
 
-Soporte para:
+Soporte para terminales independientes.
 
-### Barras
+## Barras
 
 - BARRA 1
 - BARRA 2
 - BARRA 3
+- BARRA VIP
 
-### Entradas
+## Entradas
 
 - ENTRADA 1
 - ENTRADA 2
+- ENTRADA 3
 
-Cada terminal trabaja de forma independiente.
+Cada terminal mantiene su propia numeración local de tickets.
+
+Formato:
+
+`TERMINAL + SECUENCIA`
+
+Ejemplo:
+
+```txt
+B01-000001
+B01-000002
+E01-000001
+```
 
 ---
 
 # Printing
 
-CATACONTROL soporta 3 modos de impresión.
+CATACONTROL utiliza exclusivamente **Browser Print**.
 
-## 1. CATAPRINT (recommended)
-
-Servicio local de impresión.
-
-Features:
-
-- impresión silenciosa
-- selección de impresoras
-- detección automática
-- autocutter ESC/POS
-- impresión sin diálogos
+No requiere software adicional ni agentes locales.
 
 Compatible con:
+
+- Google Chrome
+- Microsoft Edge
+
+## Características
+
+- impresión directa desde navegador
+- compatible con impresoras térmicas USB
+- compatible con corte automático (autocutter) mediante driver nativo
+- sin dependencias externas
+- sin servicios en segundo plano
+- instalación simple
+
+---
+
+# Configuración obligatoria de impresión
+
+Antes de utilizar CATACONTROL en producción, cada terminal debe configurarse correctamente.
+
+## 1. Instalar driver de impresora
+
+Instalar el driver:
+
+**80mmC**
+
+(o el driver provisto por el fabricante compatible con ESC/POS)
+
+Compatible con impresoras:
 
 - Epson
 - XPrinter
 - GPrinter
 - 3nStar
+- genéricas 80mm
 
 ---
 
-## 2. QZ Tray
+## 2. Crear tamaño de papel personalizado en Windows
 
-Modo legacy para instalaciones existentes.
+Crear un nuevo formulario de impresión:
+
+Nombre:
+
+**Ticket80**
+
+Configurar:
+
+Ancho:
+
+**80 mm**
+
+Alto:
+
+**1000 mm**
+
+(altura máxima para tickets variables)
 
 ---
 
-## 3. Browser Print
+## 3. Configurar impresora
 
-Fallback universal.
+En propiedades de la impresora seleccionar:
 
-Features:
+**Ticket80**
 
-- no requiere instalación
-- funciona en cualquier navegador
+Activar:
 
-Limitaciones:
+- Auto Cut
+- Partial Cut
 
-- sin autocutter
-- abre diálogo de impresión
+Desactivar:
+
+- márgenes automáticos
+- escalado
+
+Escala:
+
+**100%**
+
+---
+
+## 4. Primera validación
+
+Antes de habilitar ventas, cada terminal debe realizar una impresión de prueba.
+
+CATACONTROL bloquea la operación hasta confirmar:
+
+- impresora detectada
+- tamaño correcto
+- corte automático funcionando
 
 ---
 
@@ -139,102 +214,93 @@ Frontend:
 - React
 - Vite
 
-Backend local printing:
+Backend:
 
-- Node.js 20 LTS
-- Express
+- Supabase
+- PostgreSQL
 
 Printing:
 
-- Puppeteer
-- ESC/POS
-- pdf-to-printer
+- Browser Print API
+- Native OS Printer Drivers
 
 ---
 
 # Requirements
 
-Install:
+Instalar:
 
-## Node.js
+- Google Chrome
+- Driver térmico 80mmC
 
-Recommended:
+Sistema operativo recomendado:
 
-Node 20 LTS
+- Windows 10
+- Windows 11
+
+Hardware recomendado:
+
+- PC dedicada por terminal
+- Impresora térmica USB 80 mm con cutter
 
 ---
 
 # Installation
 
-Clone repository:
+Clonar repositorio:
 
 ```bash
 git clone https://github.com/LCata01/catacontrol.git
 cd catacontrol
 ```
 
-Install dependencies:
+Instalar dependencias:
 
 ```bash
 npm install
 ```
 
-Run project:
+Ejecutar en desarrollo:
 
 ```bash
 npm run dev
 ```
 
----
-
-# CATAPRINT
-
-Local printing service.
-
-Install:
+Build producción:
 
 ```bash
-cd cataprint-agent
-npm install
+npm run build
 ```
-
-Run:
-
-```bash
-npm start
-```
-
-Expected output:
-
-```txt
-CATAPRINT v0.1.0 listening on http://localhost:9100
-```
-
-Health check:
-
-http://localhost:9100/health
-
-Printers:
-
-http://localhost:9100/printers
 
 ---
 
-# Production
+# Production Environment
 
-Recommended environment:
+Configuración recomendada:
 
 - Windows 10/11
-- Google Chrome
-- Node 20 LTS
-- Thermal printer 80mm
+- Google Chrome en modo kiosk
+- Impresora térmica 80 mm USB
+- resolución fija por terminal
+
+---
+
+# Security
+
+Cada terminal mantiene:
+
+- sesión persistente
+- numeración local
+- caja independiente
+- bloqueo de rutas protegidas
+- autenticación por rol
 
 ---
 
 # License
 
-Private software.
+Software privado.
 
-All rights reserved.
+Todos los derechos reservados.
 
-CATACONTROL © 2026
+**CATACONTROL © 2026**
