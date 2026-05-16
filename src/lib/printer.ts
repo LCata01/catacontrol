@@ -3,6 +3,7 @@
 // service after every job — never inlined into the HTML here.
 
 import { getPrintService, getActivePrinter, printToActivePrinter } from "./print";
+import { browserPrintService } from "./print/browser-service";
 
 type Line = { qty: number; name: string; unit: number; subtotal: number };
 
