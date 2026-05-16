@@ -110,7 +110,7 @@ function ShiftClosuresPage() {
       const peopleComp = safe.comps.reduce((s: number, x: any) => s + Number(x.people_count || x.quantity || 0), 0);
       const consCount = safe.cons.reduce((s: number, x: any) => s + Number(x.quantity || 0), 0);
 
-      await printShiftCloseTicket({
+      await printShiftCloseTicketBrowser({
         branding: (branding ?? {}) as any,
         kind: shift.kind,
         placeName: (place as any)?.name ?? "—",
