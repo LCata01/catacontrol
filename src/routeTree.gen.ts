@@ -27,6 +27,7 @@ import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminTicketsRouteImport } from './routes/admin.tickets'
 import { Route as AdminStaffCategoriesRouteImport } from './routes/admin.staff-categories'
 import { Route as AdminStaffRouteImport } from './routes/admin.staff'
+import { Route as AdminShiftClosuresRouteImport } from './routes/admin.shift-closures'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
@@ -128,6 +129,11 @@ const AdminStaffRoute = AdminStaffRouteImport.update({
   path: '/staff',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminShiftClosuresRoute = AdminShiftClosuresRouteImport.update({
+  id: '/shift-closures',
+  path: '/shift-closures',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -199,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/admin/products': typeof AdminProductsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/shift-closures': typeof AdminShiftClosuresRoute
   '/admin/staff': typeof AdminStaffRoute
   '/admin/staff-categories': typeof AdminStaffCategoriesRoute
   '/admin/tickets': typeof AdminTicketsRoute
@@ -227,6 +234,7 @@ export interface FileRoutesByTo {
   '/admin/products': typeof AdminProductsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/shift-closures': typeof AdminShiftClosuresRoute
   '/admin/staff': typeof AdminStaffRoute
   '/admin/staff-categories': typeof AdminStaffCategoriesRoute
   '/admin/tickets': typeof AdminTicketsRoute
@@ -258,6 +266,7 @@ export interface FileRoutesById {
   '/admin/products': typeof AdminProductsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/shift-closures': typeof AdminShiftClosuresRoute
   '/admin/staff': typeof AdminStaffRoute
   '/admin/staff-categories': typeof AdminStaffCategoriesRoute
   '/admin/tickets': typeof AdminTicketsRoute
@@ -290,6 +299,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/reports'
     | '/admin/settings'
+    | '/admin/shift-closures'
     | '/admin/staff'
     | '/admin/staff-categories'
     | '/admin/tickets'
@@ -318,6 +328,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/reports'
     | '/admin/settings'
+    | '/admin/shift-closures'
     | '/admin/staff'
     | '/admin/staff-categories'
     | '/admin/tickets'
@@ -348,6 +359,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/reports'
     | '/admin/settings'
+    | '/admin/shift-closures'
     | '/admin/staff'
     | '/admin/staff-categories'
     | '/admin/tickets'
@@ -500,6 +512,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminStaffRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/shift-closures': {
+      id: '/admin/shift-closures'
+      path: '/shift-closures'
+      fullPath: '/admin/shift-closures'
+      preLoaderRoute: typeof AdminShiftClosuresRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/settings'
@@ -583,6 +602,7 @@ interface AdminRouteChildren {
   AdminProductsRoute: typeof AdminProductsRoute
   AdminReportsRoute: typeof AdminReportsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminShiftClosuresRoute: typeof AdminShiftClosuresRoute
   AdminStaffRoute: typeof AdminStaffRoute
   AdminStaffCategoriesRoute: typeof AdminStaffCategoriesRoute
   AdminTicketsRoute: typeof AdminTicketsRoute
@@ -601,6 +621,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminProductsRoute: AdminProductsRoute,
   AdminReportsRoute: AdminReportsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminShiftClosuresRoute: AdminShiftClosuresRoute,
   AdminStaffRoute: AdminStaffRoute,
   AdminStaffCategoriesRoute: AdminStaffCategoriesRoute,
   AdminTicketsRoute: AdminTicketsRoute,

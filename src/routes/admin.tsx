@@ -12,6 +12,7 @@ const tabGroups: { label: string; tabs: { to: string; label: string }[] }[] = [
   { label: "Operación", tabs: [
     { to: "/admin", label: "En Vivo" },
     { to: "/admin/cashboxes", label: "Cajas Abiertas" },
+    { to: "/admin/shift-closures", label: "Corte de Cajas" },
     { to: "/admin/reports", label: "Reportes" },
   ]},
   { label: "Tickets y Pulseras", tabs: [
