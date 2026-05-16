@@ -174,7 +174,18 @@ function BarPos() {
     <div className="flex min-h-screen flex-col">
       <TopBar title={`BARRA · ${lock?.name}`}
         right={
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            {event && (
+              <div className="hidden rounded-md border border-primary/50 bg-primary/10 px-3 py-1.5 text-xs leading-tight md:block">
+                <div className="font-bold uppercase tracking-widest text-primary">{event.name}</div>
+                {event.event_date && (
+                  <div className="text-[10px] uppercase text-muted-foreground">
+                    {new Date(event.event_date + "T00:00:00").toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" })}
+                    {event.event_time ? ` · ${String(event.event_time).slice(0,5)}` : ""}
+                  </div>
+                )}
+              </div>
+            )}
             <PrinterStatus
               tenantId={tenant?.id} tenantName={tenant?.name ?? "CATACONTROL"}
               terminalId={lock?.id} terminalName={`BARRA · ${lock?.name ?? ""}`} userId={userId}
