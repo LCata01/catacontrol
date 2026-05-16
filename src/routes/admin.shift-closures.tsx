@@ -15,7 +15,7 @@ function ShiftClosuresPage() {
   const { data } = useQuery({
     queryKey: ["closed-shifts", kind],
     queryFn: async () => {
-      const [{ data: shifts }, { data: profiles }, { data: bars }, { data: entries }] =
+      const [{ data: shifts }, { data: profiles }, { data: bars }, { data: entries }, { data: events }] =
         await Promise.all([
           supabase
             .from("shifts")
@@ -27,6 +27,7 @@ function ShiftClosuresPage() {
           supabase.from("profiles").select("id, username, display_name"),
           supabase.from("bars").select("id, name"),
           supabase.from("entries").select("id, name"),
+          supabase.from("events").select("id, name"),
         ]);
       const P: Record<string, any> = {};
       profiles?.forEach((p: any) => (P[p.id] = p));
@@ -34,10 +35,13 @@ function ShiftClosuresPage() {
       bars?.forEach((b: any) => (B[b.id] = b));
       const E: Record<string, any> = {};
       entries?.forEach((e: any) => (E[e.id] = e));
+      const EV: Record<string, any> = {};
+      events?.forEach((e: any) => (EV[e.id] = e));
       return (shifts ?? []).map((s: any) => ({
         ...s,
         user: P[s.user_id]?.display_name || P[s.user_id]?.username || "—",
         place: s.kind === "bar" ? B[s.bar_id]?.name : E[s.entry_id]?.name,
+        eventName: EV[s.event_id]?.name ?? "—",
       }));
     },
   });
@@ -174,9 +178,9 @@ function ShiftClosuresPage() {
               <tr>
                 <th className="px-4 py-2">Puesto</th>
                 <th className="px-4 py-2">Usuario</th>
+                <th className="px-4 py-2">Evento</th>
                 <th className="px-4 py-2">Apertura</th>
                 <th className="px-4 py-2">Cierre</th>
-                <th className="px-4 py-2">Efectivo inicial</th>
                 <th className="px-4 py-2"></th>
               </tr>
             </thead>
@@ -185,9 +189,9 @@ function ShiftClosuresPage() {
                 <tr key={s.id} className="border-t border-border">
                   <td className="px-4 py-3 font-bold">{s.place ?? "—"}</td>
                   <td className="px-4 py-3">{s.user}</td>
+                  <td className="px-4 py-3">{s.eventName}</td>
                   <td className="px-4 py-3">{dt(s.opened_at)}</td>
                   <td className="px-4 py-3">{s.closed_at ? dt(s.closed_at) : "—"}</td>
-                  <td className="px-4 py-3">{money(s.initial_cash)}</td>
                   <td className="px-4 py-3 text-right">
                     <button
                       onClick={() => reprint(s)}
