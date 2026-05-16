@@ -178,9 +178,9 @@ function ShiftClosuresPage() {
               <tr>
                 <th className="px-4 py-2">Puesto</th>
                 <th className="px-4 py-2">Usuario</th>
+                <th className="px-4 py-2">Evento</th>
                 <th className="px-4 py-2">Apertura</th>
                 <th className="px-4 py-2">Cierre</th>
-                <th className="px-4 py-2">Efectivo inicial</th>
                 <th className="px-4 py-2"></th>
               </tr>
             </thead>
@@ -189,9 +189,9 @@ function ShiftClosuresPage() {
                 <tr key={s.id} className="border-t border-border">
                   <td className="px-4 py-3 font-bold">{s.place ?? "—"}</td>
                   <td className="px-4 py-3">{s.user}</td>
+                  <td className="px-4 py-3">{s.eventName}</td>
                   <td className="px-4 py-3">{dt(s.opened_at)}</td>
                   <td className="px-4 py-3">{s.closed_at ? dt(s.closed_at) : "—"}</td>
-                  <td className="px-4 py-3">{money(s.initial_cash)}</td>
                   <td className="px-4 py-3 text-right">
                     <button
                       onClick={() => reprint(s)}
