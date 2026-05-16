@@ -3,6 +3,7 @@
 // service after every job — never inlined into the HTML here.
 
 import { getPrintService, getActivePrinter, printToActivePrinter } from "./print";
+import { browserPrintService } from "./print/browser-service";
 
 type Line = { qty: number; name: string; unit: number; subtotal: number };
 
@@ -285,6 +286,14 @@ function buildShiftCloseHtml(o: ShiftCloseTicketOpts): string {
 
 export async function printShiftCloseTicket(opts: ShiftCloseTicketOpts) {
   await printToActivePrinter({ html: buildShiftCloseHtml(opts), title: "Cierre de turno" });
+}
+
+/** Force browser print (used by admin reprint flow — no active printer required). */
+export async function printShiftCloseTicketBrowser(opts: ShiftCloseTicketOpts) {
+  await browserPrintService.printTicket("browser", {
+    html: buildShiftCloseHtml(opts),
+    title: "Cierre de turno",
+  });
 }
 
 /** Build the standardized 80mm CATACONTROL test ticket. */
