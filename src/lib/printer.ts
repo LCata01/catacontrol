@@ -288,6 +288,14 @@ export async function printShiftCloseTicket(opts: ShiftCloseTicketOpts) {
   await printToActivePrinter({ html: buildShiftCloseHtml(opts), title: "Cierre de turno" });
 }
 
+/** Force browser print (used by admin reprint flow — no active printer required). */
+export async function printShiftCloseTicketBrowser(opts: ShiftCloseTicketOpts) {
+  await browserPrintService.printTicket("browser", {
+    html: buildShiftCloseHtml(opts),
+    title: "Cierre de turno",
+  });
+}
+
 /** Build the standardized 80mm CATACONTROL test ticket. */
 export function buildTestTicketHtml(opts: { tenantName: string; terminalName: string }): string {
   const now = new Date();
