@@ -4,7 +4,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { dt, money } from "@/lib/format";
-import { printShiftCloseTicket } from "@/lib/printer";
+import { printShiftCloseTicketBrowser } from "@/lib/printer";
 
 export const Route = createFileRoute("/admin/shift-closures")({ component: ShiftClosuresPage });
 
