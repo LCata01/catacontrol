@@ -11,6 +11,7 @@ export const Route = createFileRoute("/admin")({
 const tabGroups: { label: string; tabs: { to: string; label: string }[] }[] = [
   { label: "Operación", tabs: [
     { to: "/admin", label: "En Vivo" },
+    { to: "/admin/events", label: "Eventos" },
     { to: "/admin/cashboxes", label: "Cajas Abiertas" },
     { to: "/admin/shift-closures", label: "Corte de Cajas" },
     { to: "/admin/reports", label: "Reportes" },
@@ -36,7 +37,6 @@ const tabGroups: { label: string; tabs: { to: string; label: string }[] }[] = [
     { to: "/admin/printing", label: "Impresión" },
   ]},
   { label: "Configuración", tabs: [
-    { to: "/admin/events", label: "Eventos" },
     { to: "/admin/users", label: "Usuarios" },
   ]},
 ];
